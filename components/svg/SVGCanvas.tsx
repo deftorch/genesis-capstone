@@ -121,22 +121,24 @@ const SVGCanvas: React.FC<SVGCanvasProps> = ({ code, width = 400, height = 400, 
           clone.setAttribute('height', targetHeight);
           
           var svgData = new XMLSerializer().serializeToString(clone);
-          var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-          var url = URL.createObjectURL(svgBlob);
+          var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
           var img = new Image();
+          img.crossOrigin = "anonymous";
           img.onload = function() {
             var canvas = document.createElement('canvas');
             canvas.width = targetWidth;
             canvas.height = targetHeight;
             var ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0);
-            URL.revokeObjectURL(url);
-            var dataURL = canvas.toDataURL('image/png');
-            window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
+            try {
+              var dataURL = canvas.toDataURL('image/png');
+              window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
+            } catch (e) {
+              window.parent.postMessage({ type: 'canvasData', dataURL: null, error: e.message }, '*');
+            }
           };
           img.onerror = function() {
-            URL.revokeObjectURL(url);
-            window.parent.postMessage({ type: 'canvasData', dataURL: null }, '*');
+            window.parent.postMessage({ type: 'canvasData', dataURL: null, error: 'Image failed to load' }, '*');
           };
           img.src = url;
         } else {

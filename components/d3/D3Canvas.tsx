@@ -144,9 +144,9 @@ const D3Canvas: React.FC<D3CanvasProps> = ({ code, width = 400, height = 400, on
           
           // Convert SVG to PNG via canvas
           const svgData = new XMLSerializer().serializeToString(clone);
-          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(svgBlob);
+          const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
           const img = new Image();
+          img.crossOrigin = "anonymous";
           img.onload = function() {
             const canvas = document.createElement('canvas');
             canvas.width = targetWidth;
@@ -157,13 +157,15 @@ const D3Canvas: React.FC<D3CanvasProps> = ({ code, width = 400, height = 400, on
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             ctx.drawImage(img, 0, 0);
-            URL.revokeObjectURL(url);
-            const dataURL = canvas.toDataURL('image/png');
-            window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
+            try {
+              const dataURL = canvas.toDataURL('image/png');
+              window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
+            } catch (e) {
+              window.parent.postMessage({ type: 'canvasData', dataURL: null, error: e.message }, '*');
+            }
           };
           img.onerror = function() {
-            URL.revokeObjectURL(url);
-            window.parent.postMessage({ type: 'canvasData', dataURL: null }, '*');
+            window.parent.postMessage({ type: 'canvasData', dataURL: null, error: 'Image failed to load' }, '*');
           };
           img.src = url;
         } else {

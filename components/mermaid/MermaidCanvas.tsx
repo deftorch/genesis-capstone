@@ -97,7 +97,8 @@ const MermaidCanvas: React.FC<MermaidCanvasProps> = ({ code, width = 400, height
       startOnLoad: true,
       theme: '${isDark ? 'dark' : 'neutral'}',
       securityLevel: 'loose',
-      fontFamily: 'Inter, system-ui, sans-serif'
+      fontFamily: 'Inter, system-ui, sans-serif',
+      htmlLabels: false
     });
 
     // Error handling
@@ -124,9 +125,9 @@ const MermaidCanvas: React.FC<MermaidCanvasProps> = ({ code, width = 400, height
           clone.setAttribute('height', targetHeight);
           
           var svgData = new XMLSerializer().serializeToString(clone);
-          var svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-          var url = URL.createObjectURL(svgBlob);
+          var url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
           var img = new Image();
+          img.crossOrigin = "anonymous";
           img.onload = function() {
             var canvas = document.createElement('canvas');
             var padding = 40; // High-res padding
@@ -136,13 +137,15 @@ const MermaidCanvas: React.FC<MermaidCanvasProps> = ({ code, width = 400, height
             ctx.fillStyle = '${isDark ? '#0b0f19' : '#ffffff'}';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(img, padding, padding, targetWidth, targetHeight);
-            URL.revokeObjectURL(url);
-            var dataURL = canvas.toDataURL('image/png');
-            window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
+            try {
+              var dataURL = canvas.toDataURL('image/png');
+              window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
+            } catch (e) {
+              window.parent.postMessage({ type: 'canvasData', dataURL: null, error: e.message }, '*');
+            }
           };
-          img.onerror = function() {
-            URL.revokeObjectURL(url);
-            window.parent.postMessage({ type: 'canvasData', dataURL: null }, '*');
+          img.onerror = function(err) {
+            window.parent.postMessage({ type: 'canvasData', dataURL: null, error: 'Image failed to load' }, '*');
           };
           img.src = url;
         } else {
