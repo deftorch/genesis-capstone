@@ -1,0 +1,280 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { streamGeminiWithRotation } from '@/lib/gemini-client';
+import { chatRateLimiter } from '@/lib/rate-limiter';
+import { sanitizeCodeForPrompt } from '@/lib/sanitize';
+import { logger } from '@/lib/logger';
+
+import * as z from 'zod';
+
+const ChatRequestSchema = z.object({
+  messages: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'system']),
+    content: z.string().max(50000),
+  })).min(1).max(100),
+  model: z.string().optional(),
+  currentCode: z.string().max(500000).optional(),
+  images: z.array(z.object({
+    base64: z.string().optional(),
+    mimeType: z.string().optional(),
+    url: z.string().url().optional(),
+  })).max(10).optional(),
+});
+
+export async function POST(req: Request) {
+  const ip = req.headers.get('x-forwarded-for') 
+          ?? req.headers.get('x-real-ip') 
+          ?? 'anonymous';
+
+  try {
+    chatRateLimiter.check(20, ip);
+  } catch {
+    return NextResponse.json(
+      { error: 'Too many requests. Please slow down.' },
+      { status: 429, headers: { 'Retry-After': '60' } }
+    );
+  }
+
+  try {
+    const rawBody = await req.json();
+    const parseResult = ChatRequestSchema.safeParse(rawBody);
+    
+    if (!parseResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid request payload', details: parseResult.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { messages, model, currentCode: rawCurrentCode, images } = parseResult.data;
+    const currentCode = rawCurrentCode ? sanitizeCodeForPrompt(rawCurrentCode) : '';
+
+    // Get the last user message
+    const lastMessage = messages[messages.length - 1];
+    const lastUserPrompt = lastMessage?.content || '';
+
+    if (!lastUserPrompt || lastUserPrompt.trim() === '') {
+      return NextResponse.json(
+        { error: 'Empty message content' },
+        { status: 400 }
+      );
+    }
+
+    // Build system instruction
+    let systemPrompt = `You are Genesis, a creative AI assistant specialized in generating visual content using p5.js, D3.js, SVG, and Mermaid.js.
+
+RENDERER SELECTION RULES:
+- Use p5.js for: generative art, simple visuals, sketches, interactive canvas, or animations if relevant
+- Use D3.js for: data visualizations such as charts (bar, line, pie, scatter, area), graphs, dashboards, or structured data displays
+- Use SVG for: illustrations, logos, icons, badges, diagrams, flowcharts, geometric art, flat design graphics, or any static vector graphic
+- Use Mermaid for: flowcharts, sequence diagrams, gantt charts, state diagrams, entity relationship diagrams, user journeys, and other structured diagrams
+
+IMPORTANT:
+- Do NOT force animation. Only include animation if it adds value or is explicitly requested.
+- Prioritize clarity, usefulness, and relevance to the user's goal over visual complexity.
+
+CRITICAL CODE FORMAT RULES:
+- ALWAYS wrap your code in a markdown code block with \`\`\`javascript
+- For p5.js code: Start with the comment "// renderer: p5" on the FIRST LINE inside the code block
+- For D3.js code: Start with the comment "// renderer: d3" on the FIRST LINE inside the code block
+- For SVG code: Start with the comment "// renderer: svg" on the FIRST LINE inside the code block, followed by the raw SVG markup starting with <svg>
+- For Mermaid code: Start with the comment "// renderer: mermaid" on the FIRST LINE inside the code block, followed by the Mermaid syntax (e.g., graph TD...)
+- This renderer comment is MANDATORY and must always be the very first line of the code
+
+p5.js RULES:
+- Must include setup() and draw() functions
+- Use createCanvas(400, 400) in setup() unless specified otherwise
+- Visuals can be static or animated depending on user needs
+- Keep visuals clean and purposeful, not overly complex
+
+D3.js RULES:
+- Always select '#chart' as the root container: d3.select('#chart')
+- Use const width = window.innerWidth and const height = window.innerHeight for responsive sizing
+- Generate realistic sample/mock data if none is provided
+- Follow margin convention: { top: 40, right: 30, bottom: 50, left: 60 }
+- Include axes, labels, and legends when useful
+- Add transitions ONLY if they improve readability or user experience
+- Use clean and professional color scales (e.g., d3.schemeTableau10)
+
+SVG RULES:
+- Output raw SVG markup (starting with <svg>) after the // renderer: svg comment
+- Always include viewBox attribute for responsive scaling (e.g., viewBox="0 0 400 400")
+- Use meaningful fill and stroke colors — avoid plain black-on-white unless intentional
+- Use clean shapes: <rect>, <circle>, <ellipse>, <path>, <polygon>, <line>, <text>, <g>
+- Group related elements with <g> and use transform for positioning
+- Add descriptive comments inside the SVG where useful
+- Keep the design clean, modern, and visually appealing
+- Use gradients (<linearGradient>, <radialGradient>) and filters for premium look when appropriate
+
+Mermaid RULES:
+- Use standard Mermaid syntax for the requested diagram type
+- Keep diagrams clear and well-structured
+- Use themes or styles if they improve readability
+- For flowcharts, use "graph TD" or "graph LR" as appropriate
+
+GENERAL RULES:
+- Add comments to explain the code
+- Focus on delivering visuals that match the user's intent
+- If the user asks a non-visual question, respond normally without code
+`;
+
+    // If there's existing code, instruct AI to modify it
+    if (currentCode && currentCode.trim()) {
+      const trimmedCode = currentCode.trimStart();
+      const isD3 = trimmedCode.startsWith('// renderer: d3');
+      const isSVG = trimmedCode.startsWith('// renderer: svg');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : 'p5.js';
+      systemPrompt += `
+CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
+- Keep the existing structure and logic that works
+- Only add, remove, or modify the parts necessary to fulfill the user's new request
+- Preserve any existing features unless the user explicitly asks to remove them
+- Keep using the same renderer (${rendererName}) unless the user explicitly asks to switch
+
+=== CURRENT CODE ===
+\`\`\`javascript
+${currentCode}
+\`\`\`
+=== END CURRENT CODE ===
+`;
+    } else {
+      systemPrompt += `
+Example p5.js code format:
+\`\`\`javascript
+// renderer: p5
+function setup() {
+  createCanvas(400, 400);
+}
+
+function draw() {
+  background(220);
+  // Your creative code here
+}
+\`\`\`
+
+Example D3.js code format:
+\`\`\`javascript
+// renderer: d3
+const width = window.innerWidth;
+const height = window.innerHeight;
+const margin = { top: 40, right: 30, bottom: 50, left: 60 };
+
+const data = [
+  { label: 'A', value: 30 },
+  { label: 'B', value: 80 },
+  { label: 'C', value: 45 },
+];
+
+const svg = d3.select('#chart')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
+
+// Build your visualization here
+\`\`\`
+
+Example SVG code format:
+\`\`\`javascript
+// renderer: svg
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Your SVG illustration here -->
+  <rect x="50" y="50" width="300" height="300" rx="20" fill="#6366f1" />
+  <circle cx="200" cy="200" r="80" fill="#f59e0b" />
+  <text x="200" y="210" text-anchor="middle" fill="white" font-size="24" font-family="sans-serif">Hello</text>
+</svg>
+\`\`\`
+`;
+    }
+
+    // Map roles to Gemini roles ('user' and 'model')
+    const contents = messages.map((msg: any, idx: number) => {
+      const parts: any[] = [
+        {
+          text: msg.content || '',
+        },
+      ];
+
+      // Attach images to the LAST user message
+      if (images && images.length > 0 && idx === messages.length - 1 && msg.role === 'user') {
+        for (const img of images) {
+          if (img.base64 && img.mimeType) {
+            // Base64-encoded image from data URL
+            parts.push({
+              inlineData: {
+                mimeType: img.mimeType,
+                data: img.base64,
+              },
+            });
+          } else if (img.url && !img.url.startsWith('data:')) {
+            // Remote URL — try to fetch and convert to base64
+            try {
+              // For remote URLs, we add them as text reference since Gemini
+              // inlineData requires base64. The model can still reference the URL.
+              parts.push({
+                text: `[Image URL: ${img.url}]`,
+              });
+            } catch {
+              // Skip if URL can't be processed
+            }
+          }
+        }
+      }
+
+      return {
+        role: msg.role === 'assistant' ? 'model' : 'user',
+        parts,
+      };
+    });
+
+    const requestBody = {
+      contents,
+      systemInstruction: {
+        parts: [
+          {
+            text: systemPrompt,
+          },
+        ],
+      },
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 4096,
+      },
+    };
+
+    // Map model names to Gemini API model IDs
+    const modelIdMap: Record<string, string> = {
+      'gemini-3-flash': 'gemini-3-flash-preview',
+      'gemini-2.5-flash': 'gemini-2.5-flash',
+      'gemini-2.5-flash-lite': 'gemini-2.5-flash-lite',
+    };
+
+    const geminiModelId = (model ? modelIdMap[model] : undefined) || 'gemini-3-flash-preview';
+
+    // Call Gemini with Key Rotation to get a stream
+    const response = await streamGeminiWithRotation(geminiModelId, requestBody);
+
+    // Return the response directly to proxy the SSE stream to the client
+    return new Response(response.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+
+  } catch (error: any) {
+    logger.error('Chat API error', { error: error.message, stack: error.stack });
+    const isQuota = error.status === 429 || error.message?.toLowerCase().includes('quota') || error.message?.toLowerCase().includes('429');
+    
+    return NextResponse.json(
+      {
+        error: isQuota
+          ? 'Your daily usage limit has been reached. Please come back tomorrow.'
+          : (error.message || 'Failed to process chat request'),
+        details: error.details || error.message,
+      },
+      { status: isQuota ? 429 : 500 }
+    );
+  }
+}
