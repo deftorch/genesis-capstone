@@ -202,7 +202,8 @@ const GenesisApp = () => {
     abortControllerRef.current = controller;
 
     try {
-      const updatedChat = chatStore.chats.find((c) => c.id === ui.activeChatId);
+      const latestChatStore = useChatStore.getState();
+      const updatedChat = latestChatStore.chats.find((c) => c.id === ui.activeChatId);
       if (!updatedChat) return;
       const history = updatedChat.messages.slice(0, index + 1).map((msg) => ({
         role: msg.role === 'user' ? 'user' : 'assistant',
@@ -221,40 +222,81 @@ const GenesisApp = () => {
         }),
       });
 
-      const data = await response.json();
-      if (data.error) {
-        const errContent = `Error: ${data.error}`;
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, errContent);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: errContent,
-            tokens: 10,
-          });
-        }
-      } else {
-        const aiContent = data.message?.content || 'No response received';
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, aiContent);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: aiContent,
-            tokens: Math.ceil(aiContent.length / 4),
-          });
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
-        const extracted = extractCode(aiContent);
-        if (extracted) {
-          if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
-          ui.setP5Code(extracted.code);
-          ui.setEditableCode(extracted.code);
-          ui.setActiveRenderer(extracted.renderer);
-          ui.setActiveTab('preview');
-          ui.setShowArtifact(true);
-          addArtifact(ui.activeChatId, updatedChat.title || 'Untitled', extracted.code, extracted.renderer);
+      if (!assistantMessageId) {
+        assistantMessageId = chatStore.addMessage(ui.activeChatId, { role: 'assistant', content: '', tokens: 0 });
+      } else {
+        chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, '');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('ReadableStream not supported.');
+      const decoder = new TextDecoder('utf-8');
+      
+      let aiContent = '';
+      let done = false;
+      let buffer = '';
+      let finalUsageMetadata: any = null;
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('data:')) {
+              const dataStr = trimmedLine.slice(5).trim();
+              if (dataStr === '[DONE]' || !dataStr) continue;
+              try {
+                const data = JSON.parse(dataStr);
+                if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
+                const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (textChunk) {
+                  aiContent += textChunk;
+                  chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
+                }
+              } catch (e) {}
+            }
+          }
         }
+      }
+
+      if (buffer.trim().startsWith('data:')) {
+        try {
+          const dataStr = buffer.trim().slice(5).trim();
+          if (dataStr && dataStr !== '[DONE]') {
+            const data = JSON.parse(dataStr);
+            if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
+            const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textChunk) {
+              aiContent += textChunk;
+              chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (finalUsageMetadata) {
+        chatStore.updateMessageTokens(ui.activeChatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);
+      }
+
+      const extracted = extractCode(aiContent);
+      if (extracted) {
+        if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
+        ui.setP5Code(extracted.code);
+        ui.setEditableCode(extracted.code);
+        ui.setActiveRenderer(extracted.renderer);
+        ui.setActiveTab('preview');
+        ui.setShowArtifact(true);
+        addArtifact(ui.activeChatId, updatedChat.title || 'Untitled', extracted.code, extracted.renderer);
       }
     } catch (err: any) {
       if (err.name === 'AbortError') {
@@ -339,40 +381,81 @@ const GenesisApp = () => {
         }),
       });
 
-      const data = await response.json();
-      if (data.error) {
-        const errContent = `Error: ${data.error}`;
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, errContent);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: errContent,
-            tokens: 10,
-          });
-        }
-      } else {
-        const aiContent = data.message?.content || 'No response received';
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, aiContent);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: aiContent,
-            tokens: Math.ceil(aiContent.length / 4),
-          });
-        }
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
 
-        const extracted = extractCode(aiContent);
-        if (extracted) {
-          if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
-          ui.setP5Code(extracted.code);
-          ui.setEditableCode(extracted.code);
-          ui.setActiveRenderer(extracted.renderer);
-          ui.setActiveTab('preview');
-          ui.setShowArtifact(true);
-          addArtifact(ui.activeChatId, chat.title || 'Untitled', extracted.code, extracted.renderer);
+      if (!assistantMessageId) {
+        assistantMessageId = chatStore.addMessage(ui.activeChatId, { role: 'assistant', content: '', tokens: 0 });
+      } else {
+        chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, '');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('ReadableStream not supported.');
+      const decoder = new TextDecoder('utf-8');
+      
+      let aiContent = '';
+      let done = false;
+      let buffer = '';
+      let finalUsageMetadata: any = null;
+
+      while (!done) {
+        const { value, done: readerDone } = await reader.read();
+        done = readerDone;
+        if (value) {
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('data:')) {
+              const dataStr = trimmedLine.slice(5).trim();
+              if (dataStr === '[DONE]' || !dataStr) continue;
+              try {
+                const data = JSON.parse(dataStr);
+                if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
+                const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (textChunk) {
+                  aiContent += textChunk;
+                  chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
+                }
+              } catch (e) {}
+            }
+          }
         }
+      }
+
+      if (buffer.trim().startsWith('data:')) {
+        try {
+          const dataStr = buffer.trim().slice(5).trim();
+          if (dataStr && dataStr !== '[DONE]') {
+            const data = JSON.parse(dataStr);
+            if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
+            const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textChunk) {
+              aiContent += textChunk;
+              chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (finalUsageMetadata) {
+        chatStore.updateMessageTokens(ui.activeChatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);
+      }
+
+      const extracted = extractCode(aiContent);
+      if (extracted) {
+        if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
+        ui.setP5Code(extracted.code);
+        ui.setEditableCode(extracted.code);
+        ui.setActiveRenderer(extracted.renderer);
+        ui.setActiveTab('preview');
+        ui.setShowArtifact(true);
+        addArtifact(ui.activeChatId, chat.title || 'Untitled', extracted.code, extracted.renderer);
       }
     } catch (err: any) {
       if (err.name === 'AbortError') {

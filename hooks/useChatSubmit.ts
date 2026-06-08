@@ -96,7 +96,8 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
       const imagePayloads = buildImagePayloads(images);
       const { buildContextForAPI } = await import('@/lib/chat-summarizer');
       
-      const updatedChat = chatStore.chats.find(c => c.id === currentChatId);
+      const latestChatStore = useChatStore.getState();
+      const updatedChat = latestChatStore.chats.find(c => c.id === currentChatId);
       const apiMessages = updatedChat 
         ? buildContextForAPI(
             updatedChat.messages,
