@@ -204,7 +204,7 @@ const SVGCanvas: React.FC<SVGCanvasProps> = ({ code, width = 400, height = 400, 
         srcDoc={htmlContent}
         className={`w-full flex-1 border-0 rounded-lg transition-colors duration-300 ${isDark ? 'bg-gray-950' : 'bg-white'}`}
         style={{ width: '100%', height: '100%', border: 'none' }}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-same-origin"
         title="SVG Illustration"
       />
     </div>

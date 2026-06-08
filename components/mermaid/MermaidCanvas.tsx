@@ -195,7 +195,7 @@ const MermaidCanvas: React.FC<MermaidCanvasProps> = ({ code, width = 400, height
         srcDoc={htmlContent}
         className={`w-full flex-1 border-0 rounded-lg transition-colors duration-300 ${isDark ? 'bg-gray-950' : 'bg-white'}`}
         style={{ width: '100%', height: '100%', border: 'none' }}
-        sandbox="allow-scripts"
+        sandbox="allow-scripts allow-same-origin"
         title="Mermaid Diagram"
       />
     </div>
