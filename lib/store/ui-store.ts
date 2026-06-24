@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { RendererType } from '@/types';
+import { RendererType, ImageAttachment } from '@/types';
 
 interface UIState {
   // Panel visibility
@@ -34,6 +34,7 @@ interface UIState {
 
   // Input
   inputMessage: string;
+  attachedImages: ImageAttachment[];
 
   // Modals
   isSettingsOpen: boolean;
@@ -61,6 +62,8 @@ interface UIState {
   setPanMode: (mode: boolean) => void;
   setIsTrueFullscreen: (fs: boolean) => void;
   setInputMessage: (msg: string) => void;
+  setAttachedImages: (images: ImageAttachment[] | ((prev: ImageAttachment[]) => ImageAttachment[])) => void;
+  removeAttachedImage: (id: string) => void;
   setIsMobileTemplatesOpen: (open: boolean) => void;
   setShowMobileChatInput: (show: boolean) => void;
   setIsSettingsOpen: (open: boolean) => void;
@@ -96,6 +99,7 @@ export const useUIStore = create<UIState>((set) => ({
   panMode: false,
   isTrueFullscreen: false,
   inputMessage: '',
+  attachedImages: [],
   isSettingsOpen: false,
   isAuthModalOpen: false,
   isCreateProjectOpen: false,
@@ -125,6 +129,15 @@ export const useUIStore = create<UIState>((set) => ({
   setPanMode: (mode) => set({ panMode: mode }),
   setIsTrueFullscreen: (fs) => set({ isTrueFullscreen: fs }),
   setInputMessage: (msg) => set({ inputMessage: msg }),
+  setAttachedImages: (images) =>
+    set((state) => ({
+      attachedImages:
+        typeof images === 'function' ? images(state.attachedImages) : images,
+    })),
+  removeAttachedImage: (id) =>
+    set((state) => ({
+      attachedImages: state.attachedImages.filter((img) => img.id !== id),
+    })),
   setIsMobileTemplatesOpen: (open) => set({ isMobileTemplatesOpen: open }),
   setShowMobileChatInput: (show) => set({ showMobileChatInput: show }),
   setIsSettingsOpen: (open) => set({ isSettingsOpen: open }),
@@ -145,5 +158,6 @@ export const useUIStore = create<UIState>((set) => ({
       isArtifactFullscreen: false,
       activeVersionNumber: null,
       inputMessage: '',
+      attachedImages: [],
     }),
 }));

@@ -34,9 +34,6 @@ interface ChatPanelProps {
   isLoading: boolean;
   onSendMessage: (customPrompt?: string) => Promise<void>;
   onStopGeneration: () => void;
-  attachedImages: ImageAttachment[];
-  setAttachedImages: React.Dispatch<React.SetStateAction<ImageAttachment[]>>;
-  removeAttachedImage: (id: string) => void;
   isUploading: boolean;
   fileInputRef: React.RefObject<HTMLInputElement>;
   chatInputRef: React.RefObject<HTMLTextAreaElement>;
@@ -47,20 +44,6 @@ interface ChatPanelProps {
   onRegenerate: (messageId: string) => void;
   onSwitchVersionIdx: (messageId: string, idx: number) => void;
   onSaveMessageEdit: (messageId: string, index: number, text: string) => void;
-
-  onStartNewChat: () => void;
-  onSelectChat: (id: string) => void;
-  onLoadArtifactCode: (artifact: any) => void;
-  onDeleteArtifact: (id: string) => void;
-
-  chatSearchQuery: string;
-  setChatSearchQuery: (query: string) => void;
-  isMultiSelectChats: boolean;
-  setIsMultiSelectChats: (val: boolean) => void;
-  selectedChatIds: string[];
-  setSelectedChatIds: React.Dispatch<React.SetStateAction<string[]>>;
-
-  greeting: string;
 }
 
 export const ChatPanel: React.FC<ChatPanelProps> = ({
@@ -68,9 +51,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   isLoading,
   onSendMessage,
   onStopGeneration,
-  attachedImages,
-  setAttachedImages,
-  removeAttachedImage,
   isUploading,
   fileInputRef,
   chatInputRef,
@@ -81,17 +61,6 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
   onRegenerate,
   onSwitchVersionIdx,
   onSaveMessageEdit,
-  onStartNewChat,
-  onSelectChat,
-  onLoadArtifactCode,
-  onDeleteArtifact,
-  chatSearchQuery,
-  setChatSearchQuery,
-  isMultiSelectChats,
-  setIsMultiSelectChats,
-  selectedChatIds,
-  setSelectedChatIds,
-  greeting,
 }) => {
   const ui = useUIStore();
   const chatStore = useChatStore();
@@ -230,12 +199,11 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         </div>
       </div>
 
-      {/* Conditionally Render views */}      {ui.currentView === 'home' ? (
+      {ui.currentView === 'home' ? (
         <HomeView
-          greeting={greeting}
           chatInputRef={chatInputRef}
-          attachedImages={attachedImages}
-          removeAttachedImage={removeAttachedImage}
+          attachedImages={ui.attachedImages}
+          removeAttachedImage={ui.removeAttachedImage}
           isLoading={isLoading}
           onSendMessage={onSendMessage}
           isUploading={isUploading}
@@ -250,26 +218,11 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         <ProjectsView
           setNewProjectName={setNewProjectName}
           setNewProjectDesc={setNewProjectDesc}
-          onSelectChat={onSelectChat}
         />
       ) : ui.currentView === 'chats' ? (
-        <ChatsView
-          isMultiSelectChats={isMultiSelectChats}
-          setIsMultiSelectChats={setIsMultiSelectChats}
-          selectedChatIds={selectedChatIds}
-          setSelectedChatIds={setSelectedChatIds}
-          onStartNewChat={onStartNewChat}
-          chatSearchQuery={chatSearchQuery}
-          setChatSearchQuery={setChatSearchQuery}
-          sortedChats={sortedChats}
-          onSelectChat={onSelectChat}
-        />
+        <ChatsView sortedChats={sortedChats} />
       ) : ui.currentView === 'gallery' ? (
-        <GalleryView
-          onStartNewChat={onStartNewChat}
-          onLoadArtifactCode={onLoadArtifactCode}
-          onDeleteArtifact={onDeleteArtifact}
-        />
+        <GalleryView />
       ) : (
         /* Active Chat View */
         <ActiveChatView
@@ -280,8 +233,8 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           onSwitchVersionIdx={onSwitchVersionIdx}
           onSaveMessageEdit={onSaveMessageEdit}
           codeVersions={codeVersions}
-          attachedImages={attachedImages}
-          removeAttachedImage={removeAttachedImage}
+          attachedImages={ui.attachedImages}
+          removeAttachedImage={ui.removeAttachedImage}
           chatInputRef={chatInputRef}
           onSendMessage={onSendMessage}
           isUploading={isUploading}

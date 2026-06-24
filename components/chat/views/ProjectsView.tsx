@@ -3,18 +3,18 @@ import { FolderOpen, Plus, Trash2, MessageSquare } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useUIStore } from '@/lib/store/ui-store';
 import { formatDate } from '@/lib/utils';
+import { useChatNavigation } from '@/hooks/useChatNavigation';
 
 interface ProjectsViewProps {
   setNewProjectName: (name: string) => void;
   setNewProjectDesc: (desc: string) => void;
-  onSelectChat: (id: string) => void;
 }
 
 export const ProjectsView: React.FC<ProjectsViewProps> = ({
   setNewProjectName,
   setNewProjectDesc,
-  onSelectChat,
 }) => {
+  const { selectChat: onSelectChat } = useChatNavigation();
   const chatStore = useChatStore();
   const ui = useUIStore();
 

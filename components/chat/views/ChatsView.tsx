@@ -3,30 +3,21 @@ import { MessageSquare, Plus, Search } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat-store';
 import { getRelativeTimeString } from '@/components/chat/utils';
 
+import { useChatNavigation } from '@/hooks/useChatNavigation';
+import { useState } from 'react';
+
 interface ChatsViewProps {
-  isMultiSelectChats: boolean;
-  setIsMultiSelectChats: (val: boolean) => void;
-  selectedChatIds: string[];
-  setSelectedChatIds: (val: string[]) => void;
-  onStartNewChat: () => void;
-  chatSearchQuery: string;
-  setChatSearchQuery: (val: string) => void;
   sortedChats: any[];
-  onSelectChat: (id: string) => void;
 }
 
 export const ChatsView: React.FC<ChatsViewProps> = ({
-  isMultiSelectChats,
-  setIsMultiSelectChats,
-  selectedChatIds,
-  setSelectedChatIds,
-  onStartNewChat,
-  chatSearchQuery,
-  setChatSearchQuery,
   sortedChats,
-  onSelectChat,
 }) => {
+  const { startNewChat: onStartNewChat, selectChat: onSelectChat } = useChatNavigation();
   const chatStore = useChatStore();
+  const [chatSearchQuery, setChatSearchQuery] = useState('');
+  const [isMultiSelectChats, setIsMultiSelectChats] = useState(false);
+  const [selectedChatIds, setSelectedChatIds] = useState<string[]>([]);
 
   return (
     <div className="flex-1 overflow-y-auto p-8 animate-fade-in bg-transparent">

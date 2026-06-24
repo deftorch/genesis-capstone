@@ -19,21 +19,24 @@ import { useUIStore } from '@/lib/store/ui-store';
 import { useChatStore } from '@/lib/store/chat-store';
 import { formatDate } from '@/lib/utils';
 
+import { useChatNavigation } from '@/hooks/useChatNavigation';
+
 interface SidebarProps {
-  onSelectChat: (id: string, shouldShowArtifact?: boolean) => void;
-  onStartNewChat: () => void;
-  onDeleteChat: (id: string) => void;
-  onOpenGallery: () => void;
   hydrated: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  onSelectChat,
-  onStartNewChat,
-  onDeleteChat,
-  onOpenGallery,
   hydrated,
 }) => {
+  const { onSelectChat, onStartNewChat, onDeleteChat, onOpenGallery } = (() => {
+    const nav = useChatNavigation();
+    return {
+      onSelectChat: nav.selectChat,
+      onStartNewChat: () => nav.startNewChat(),
+      onDeleteChat: nav.deleteChat,
+      onOpenGallery: nav.openGallery,
+    };
+  })();
   const ui = useUIStore();
   const chatStore = useChatStore();
 

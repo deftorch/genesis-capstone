@@ -8,7 +8,6 @@ import { AIModel, ImageAttachment } from '@/types';
 import { FILE_UPLOAD_CONFIG, AI_MODELS } from '@/config/constants';
 
 interface HomeViewProps {
-  greeting: string;
   chatInputRef: React.RefObject<HTMLTextAreaElement>;
   attachedImages: ImageAttachment[];
   removeAttachedImage: (id: string) => void;
@@ -24,7 +23,6 @@ interface HomeViewProps {
 }
 
 export const HomeView: React.FC<HomeViewProps> = ({
-  greeting,
   chatInputRef,
   attachedImages,
   removeAttachedImage,
@@ -41,6 +39,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const ui = useUIStore();
   const { preferences } = useSettingsStore();
   const { toast } = useToast();
+
+  const [greeting, setGreeting] = React.useState('Welcome back');
+  React.useEffect(() => {
+    const hrs = new Date().getHours();
+    if (hrs < 12) setGreeting('Good morning');
+    else if (hrs < 17) setGreeting('Good afternoon');
+    else setGreeting('Good evening');
+  }, []);
 
   const creationTools = [
     { name: 'Canvas', icon: Layout, prompt: 'Create a colorful animated canvas' },

@@ -12,17 +12,14 @@ const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false 
 const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
 const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
 
-interface GalleryViewProps {
-  onStartNewChat: () => void;
-  onLoadArtifactCode: (artifact: Artifact) => void;
-  onDeleteArtifact: (id: string) => void;
-}
+import { useChatNavigation } from '@/hooks/useChatNavigation';
+import { useArtifactManager } from '@/hooks/useArtifactManager';
 
-export const GalleryView: React.FC<GalleryViewProps> = ({
-  onStartNewChat,
-  onLoadArtifactCode,
-  onDeleteArtifact,
-}) => {
+interface GalleryViewProps {}
+
+export const GalleryView: React.FC<GalleryViewProps> = () => {
+  const { startNewChat: onStartNewChat, loadArtifactCode: onLoadArtifactCode } = useChatNavigation();
+  const { deleteArtifact: onDeleteArtifact } = useArtifactManager();
   const chatStore = useChatStore();
   const { preferences } = useSettingsStore();
 
