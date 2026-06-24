@@ -46,9 +46,7 @@ const GenesisApp = () => {
   const [isMultiSelectChats, setIsMultiSelectChats] = useState(false);
   const [selectedChatIds, setSelectedChatIds] = useState<string[]>([]);
 
-  // State/controller references for submits & edits
-  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // State/controller references for submits & edits (Moved to useChatSubmit)
 
   // Set greeting based on time of day
   useEffect(() => {
@@ -120,7 +118,7 @@ const GenesisApp = () => {
   const { addArtifact, deleteArtifact } = useArtifactManager();
 
   // Chat Submission hooks
-  const { submit: chatSubmit, isLoading, stopGeneration } = useChatSubmit({
+  const { submit: chatSubmit, isLoading, stopGeneration, regeneratingId, handleRegenerateFrom } = useChatSubmit({
     chatId: ui.activeChatId,
     selectedModel,
   });
@@ -184,243 +182,14 @@ const GenesisApp = () => {
   };
 
   const handleSaveMessageEdit = async (messageId: string, index: number, text: string) => {
-    if (!ui.activeChatId || !text.trim()) return;
-
-    chatStore.updateMessage(ui.activeChatId, messageId, text);
-
-    const chat = chatStore.chats.find((c) => c.id === ui.activeChatId);
-    let assistantMessageId = '';
-    if (chat) {
-      const nextIdx = index + 1;
-      if (nextIdx < chat.messages.length && chat.messages[nextIdx].role === 'assistant') {
-        assistantMessageId = chat.messages[nextIdx].id;
-      }
-    }
-
-    // Trigger regeneration
-    ui.setShowArtifact(false);
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    try {
-      const latestChatStore = useChatStore.getState();
-      const updatedChat = latestChatStore.chats.find((c) => c.id === ui.activeChatId);
-      if (!updatedChat) return;
-      const history = updatedChat.messages.slice(0, index + 1).map((msg) => ({
-        role: msg.role === 'user' ? 'user' : 'assistant',
-        content: msg.content,
-      }));
-
-      const hasCodeContext = history.some((m) => m.content.includes('// renderer:'));
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          messages: history,
-          model: updatedChat.modelConfig.model || 'gemini-3-flash',
-          currentCode: hasCodeContext ? ui.editableCode || '' : '',
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      if (!assistantMessageId) {
-        assistantMessageId = chatStore.addMessage(ui.activeChatId, { role: 'assistant', content: '', tokens: 0 });
-      } else {
-        chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, '');
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('ReadableStream not supported.');
-      
-      let aiContent = '';
-      let finalUsageMetadata: any = null;
-
-      await parseSSEStream(
-        reader,
-        (textChunk) => {
-          aiContent += textChunk;
-          chatStore.updateMessageContent(ui.activeChatId!, assistantMessageId, aiContent);
-        },
-        (metadata) => {
-          if (metadata) {
-            finalUsageMetadata = metadata;
-          }
-        }
-      );
-
-      if (finalUsageMetadata) {
-        chatStore.updateMessageTokens(ui.activeChatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);
-      }
-
-      const extracted = extractCode(aiContent);
-      if (extracted) {
-        if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
-        ui.setP5Code(extracted.code);
-        ui.setEditableCode(extracted.code);
-        ui.setActiveRenderer(extracted.renderer);
-        ui.setActiveTab('preview');
-        ui.setShowArtifact(true);
-        addArtifact(ui.activeChatId, updatedChat.title || 'Untitled', extracted.code, extracted.renderer);
-      }
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
-        const stopMsg = 'Generation stopped.';
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, stopMsg);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: stopMsg,
-            tokens: 0,
-          });
-        }
-      } else {
-        const errMsg = 'Failed to connect to AI service. Please try again.';
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, errMsg);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: errMsg,
-            tokens: 10,
-          });
-        }
-      }
-    } finally {
-      abortControllerRef.current = null;
+    if (handleRegenerateFrom) {
+      await handleRegenerateFrom(messageId, text);
     }
   };
 
   const handleRegenerateMessage = async (messageId: string) => {
-    if (!ui.activeChatId) return;
-    const chat = chatStore.chats.find((c) => c.id === ui.activeChatId);
-    if (!chat) return;
-
-    const messageIndex = chat.messages.findIndex((m) => m.id === messageId);
-    if (messageIndex === -1) return;
-
-    const message = chat.messages[messageIndex];
-    const isAssistant = message.role === 'assistant';
-
-    let userMessageIndex = messageIndex;
-    let assistantMessageId = '';
-
-    if (isAssistant) {
-      userMessageIndex = messageIndex - 1;
-      assistantMessageId = messageId;
-    } else {
-      const assistantMessageIndex = messageIndex + 1;
-      if (
-        assistantMessageIndex < chat.messages.length &&
-        chat.messages[assistantMessageIndex].role === 'assistant'
-      ) {
-        assistantMessageId = chat.messages[assistantMessageIndex].id;
-      }
-    }
-
-    if (userMessageIndex < 0) return;
-
-    setRegeneratingId(messageId);
-    ui.setShowArtifact(false);
-
-    const history = chat.messages.slice(0, userMessageIndex + 1).map((msg) => ({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-    }));
-
-    const modelToUse = selectedModel || 'gemini-3-flash';
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-
-    try {
-      const hasCodeContext = history.some((m) => m.content.includes('// renderer:'));
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: controller.signal,
-        body: JSON.stringify({
-          messages: history,
-          model: modelToUse,
-          currentCode: hasCodeContext ? ui.editableCode || '' : '',
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-      }
-
-      if (!assistantMessageId) {
-        assistantMessageId = chatStore.addMessage(ui.activeChatId, { role: 'assistant', content: '', tokens: 0 });
-      } else {
-        chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, '');
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('ReadableStream not supported.');
-      
-      let aiContent = '';
-      let finalUsageMetadata: any = null;
-
-      await parseSSEStream(
-        reader,
-        (textChunk) => {
-          aiContent += textChunk;
-          chatStore.updateMessageContent(ui.activeChatId!, assistantMessageId, aiContent);
-        },
-        (metadata) => {
-          if (metadata) {
-            finalUsageMetadata = metadata;
-          }
-        }
-      );
-
-      if (finalUsageMetadata) {
-        chatStore.updateMessageTokens(ui.activeChatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);
-      }
-
-      const extracted = extractCode(aiContent);
-      if (extracted) {
-        if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
-        ui.setP5Code(extracted.code);
-        ui.setEditableCode(extracted.code);
-        ui.setActiveRenderer(extracted.renderer);
-        ui.setActiveTab('preview');
-        ui.setShowArtifact(true);
-        addArtifact(ui.activeChatId, chat.title || 'Untitled', extracted.code, extracted.renderer);
-      }
-    } catch (err: any) {
-      if (err.name === 'AbortError') {
-        const stopMsg = 'Generation stopped.';
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, stopMsg);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: stopMsg,
-            tokens: 0,
-          });
-        }
-      } else {
-        const errMsg = 'Failed to connect to AI service. Please try again.';
-        if (assistantMessageId) {
-          chatStore.updateMessage(ui.activeChatId, assistantMessageId, errMsg);
-        } else {
-          chatStore.addMessage(ui.activeChatId, {
-            role: 'assistant',
-            content: errMsg,
-            tokens: 10,
-          });
-        }
-      }
-    } finally {
-      setRegeneratingId(null);
-      abortControllerRef.current = null;
+    if (handleRegenerateFrom) {
+      await handleRegenerateFrom(messageId);
     }
   };
 

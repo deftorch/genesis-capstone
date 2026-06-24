@@ -209,5 +209,145 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
     }
   }, [chatId, selectedModel, ui, chatStore, buildImagePayloads]);
 
-  return { submit, isLoading, stopGeneration, regeneratingId, setRegeneratingId, syncMessages };
+  const handleRegenerateFrom = useCallback(async (messageId: string, newContent?: string) => {
+    if (!chatId) return;
+    const chat = chatStore.chats.find((c) => c.id === chatId);
+    if (!chat) return;
+
+    const messageIndex = chat.messages.findIndex((m) => m.id === messageId);
+    if (messageIndex === -1) return;
+
+    if (newContent !== undefined) {
+      if (!newContent.trim()) return;
+      chatStore.updateMessage(chatId, messageId, newContent);
+    }
+
+    const updatedChat = chatStore.chats.find((c) => c.id === chatId);
+    if (!updatedChat) return;
+
+    const message = updatedChat.messages[messageIndex];
+    const isAssistant = message.role === 'assistant';
+
+    let userMessageIndex = messageIndex;
+    let assistantMessageId = '';
+
+    if (isAssistant) {
+      userMessageIndex = messageIndex - 1;
+      assistantMessageId = messageId;
+    } else {
+      const assistantMessageIndex = messageIndex + 1;
+      if (
+        assistantMessageIndex < updatedChat.messages.length &&
+        updatedChat.messages[assistantMessageIndex].role === 'assistant'
+      ) {
+        assistantMessageId = updatedChat.messages[assistantMessageIndex].id;
+      }
+    }
+
+    if (userMessageIndex < 0) return;
+
+    setRegeneratingId(messageId);
+    ui.setShowArtifact(false);
+
+    const history = updatedChat.messages.slice(0, userMessageIndex + 1).map((msg) => ({
+      role: msg.role === 'user' ? 'user' : 'assistant',
+      content: msg.content,
+    }));
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      const hasCodeContext = history.some((m) => m.content.includes('// renderer:'));
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({
+          messages: history,
+          model: selectedModel || 'gemini-3-flash',
+          currentCode: hasCodeContext ? ui.editableCode || '' : '',
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      if (!assistantMessageId) {
+        assistantMessageId = chatStore.addMessage(chatId, { role: 'assistant', content: '', tokens: 0 });
+      } else {
+        chatStore.updateMessageContent(chatId, assistantMessageId, '');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('ReadableStream not supported.');
+      
+      let aiContent = '';
+      let finalUsageMetadata: any = null;
+
+      await parseSSEStream(
+        reader,
+        (textChunk) => {
+          aiContent += textChunk;
+          chatStore.updateMessageContent(chatId, assistantMessageId, aiContent);
+        },
+        (metadata) => {
+          if (metadata) {
+            finalUsageMetadata = metadata;
+          }
+        }
+      );
+
+      if (finalUsageMetadata) {
+        chatStore.updateMessageTokens(chatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);
+      }
+
+      const extracted = extractCode(aiContent);
+      if (extracted) {
+        if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
+        ui.setP5Code(extracted.code);
+        ui.setEditableCode(extracted.code);
+        ui.setActiveRenderer(extracted.renderer);
+        ui.setActiveTab('preview');
+        ui.setShowArtifact(true);
+        chatStore.addArtifact({
+          chatId: chatId,
+          chatTitle: updatedChat.title || 'Untitled',
+          code: extracted.code,
+          renderer: extracted.renderer,
+        });
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        const stopMsg = 'Generation stopped.';
+        if (assistantMessageId) {
+          chatStore.updateMessage(chatId, assistantMessageId, stopMsg);
+        } else {
+          chatStore.addMessage(chatId, {
+            role: 'assistant',
+            content: stopMsg,
+            tokens: 0,
+          });
+        }
+      } else {
+        const errMsg = 'Failed to connect to AI service. Please try again.';
+        if (assistantMessageId) {
+          chatStore.updateMessage(chatId, assistantMessageId, errMsg);
+        } else {
+          chatStore.addMessage(chatId, {
+            role: 'assistant',
+            content: errMsg,
+            tokens: 10,
+          });
+        }
+      }
+    } finally {
+      setRegeneratingId(null);
+      abortControllerRef.current = null;
+    }
+  }, [chatId, selectedModel, ui, chatStore]);
+
+  return { submit, isLoading, stopGeneration, regeneratingId, setRegeneratingId, syncMessages, handleRegenerateFrom };
 }
