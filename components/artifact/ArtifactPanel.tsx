@@ -101,6 +101,7 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
   const panStartRef = useRef({ x: 0, y: 0 });
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Load download settings
   useEffect(() => {
@@ -278,6 +279,7 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
     ui.setP5Code(ui.editableCode);
     ui.setActiveTab('preview');
     ui.setIsPlaying(true);
+    setRefreshKey((prev) => prev + 1);
   };
 
   const handleTogglePlay = () => {
@@ -846,13 +848,13 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
               }}
             >
               {ui.p5Code && ui.activeRenderer === 'd3' ? (
-                <D3Canvas code={ui.p5Code} width={400} height={400} />
+                <D3Canvas key={`d3-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code && ui.activeRenderer === 'svg' ? (
-                <SVGCanvas code={ui.p5Code} width={400} height={400} />
+                <SVGCanvas key={`svg-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code && ui.activeRenderer === 'mermaid' ? (
-                <MermaidCanvas code={ui.p5Code} width={400} height={400} />
+                <MermaidCanvas key={`mermaid-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code ? (
-                <P5Canvas code={ui.p5Code} width={400} height={400} />
+                <P5Canvas key={`p5-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : (
                 <div className="bg-gray-200 h-full flex items-center justify-center rounded-lg w-full">
                   <div className="text-center text-gray-500">
