@@ -61,24 +61,25 @@ const SVGCanvas: React.FC<SVGCanvasProps> = ({ code, width = 400, height = 400, 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
       display: flex; 
-      justify-content: center; 
-      align-items: center; 
+      flex-direction: column;
       min-height: 100vh;
       background: ${isDark ? '#0b0f19' : '#ffffff'};
-      overflow: hidden;
+      overflow: auto;
       transition: background-color 0.3s ease;
     }
     .svg-container {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
-      height: 100vh;
+      min-height: 100vh;
       padding: 20px;
     }
     .svg-container svg {
       max-width: 100%;
-      height: auto !important;
+      width: auto;
+      height: auto;
+      margin: auto;
       display: block;
     }
     .error {

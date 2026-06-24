@@ -58,8 +58,7 @@ const MermaidCanvas: React.FC<MermaidCanvasProps> = ({ code, width = 400, height
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
       display: flex; 
-      justify-content: center; 
-      align-items: center; 
+      flex-direction: column;
       min-height: 100vh;
       background: ${isDark ? '#0b0f19' : '#ffffff'};
       overflow: auto;
@@ -69,12 +68,14 @@ const MermaidCanvas: React.FC<MermaidCanvasProps> = ({ code, width = 400, height
     .mermaid {
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       width: 100%;
+      min-height: 100%;
     }
     .mermaid svg {
       max-width: 100% !important;
       height: auto !important;
+      margin: auto;
     }
     .error {
       color: #ff6b6b;

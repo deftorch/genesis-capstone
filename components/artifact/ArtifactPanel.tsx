@@ -30,6 +30,8 @@ import {
   Send,
   Square,
   PanelLeft,
+  Play,
+  Pause,
 } from 'lucide-react';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useChatStore } from '@/lib/store/chat-store';
@@ -275,6 +277,16 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
   const handleRunCode = () => {
     ui.setP5Code(ui.editableCode);
     ui.setActiveTab('preview');
+    ui.setIsPlaying(true);
+  };
+
+  const handleTogglePlay = () => {
+    const nextState = !ui.isPlaying;
+    ui.setIsPlaying(nextState);
+    const iframe = previewViewportRef.current?.querySelector('iframe');
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage(nextState ? 'playCanvas' : 'pauseCanvas', '*');
+    }
   };
 
   const handleCopyCode = () => {
@@ -524,6 +536,15 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
 
           {/* Action Controls */}
           <div className="flex items-center gap-1">
+            {ui.activeRenderer === 'p5' && (
+              <button
+                onClick={handleTogglePlay}
+                className="p-1.5 rounded-md transition-all cursor-pointer relative preview-panel-action text-[#60aaff] hover:bg-[#60aaff]/10"
+                title={ui.isPlaying ? 'Pause Animation' : 'Play Animation'}
+              >
+                {ui.isPlaying ? <Pause size={14} /> : <Play size={14} />}
+              </button>
+            )}
             <button
               onClick={handleRunCode}
               className="p-1.5 rounded-md transition-all cursor-pointer preview-panel-action text-[#60aaff] hover:bg-[#60aaff]/10"

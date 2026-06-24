@@ -140,6 +140,10 @@ const P5Canvas: React.FC<P5CanvasProps> = ({ code, width = 400, height = 400, on
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
           mediaRecorder.stop();
         }
+      } else if (event.data === 'pauseCanvas') {
+        if (typeof window.noLoop === 'function') window.noLoop();
+      } else if (event.data === 'playCanvas') {
+        if (typeof window.loop === 'function') window.loop();
       }
     });
 

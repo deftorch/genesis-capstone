@@ -18,6 +18,7 @@ export interface CanvasSlice {
   pan: { x: number; y: number };
   panMode: boolean;
   isTrueFullscreen: boolean;
+  isPlaying: boolean;
 
   setShowArtifact: (show: boolean) => void;
   setIsArtifactFullscreen: (fs: boolean) => void;
@@ -32,6 +33,7 @@ export interface CanvasSlice {
   setPan: (pan: { x: number; y: number }) => void;
   setPanMode: (mode: boolean) => void;
   setIsTrueFullscreen: (fs: boolean) => void;
+  setIsPlaying: (playing: boolean) => void;
 }
 
 export const createCanvasSlice: StateCreator<UIState, [], [], CanvasSlice> = (set) => ({
@@ -50,6 +52,7 @@ export const createCanvasSlice: StateCreator<UIState, [], [], CanvasSlice> = (se
   pan: { x: 0, y: 0 },
   panMode: false,
   isTrueFullscreen: false,
+  isPlaying: true,
 
   setShowArtifact: (show) => set({ showArtifact: show }),
   setIsArtifactFullscreen: (fs) => set({ isArtifactFullscreen: fs, artifactMode: fs ? 'wide' : 'standard' }),
@@ -69,4 +72,5 @@ export const createCanvasSlice: StateCreator<UIState, [], [], CanvasSlice> = (se
   setPan: (pan) => set({ pan }),
   setPanMode: (mode) => set({ panMode: mode }),
   setIsTrueFullscreen: (fs) => set({ isTrueFullscreen: fs }),
+  setIsPlaying: (playing) => set({ isPlaying: playing }),
 });
