@@ -18,6 +18,7 @@ import { useVersionHistory } from '@/hooks/useVersionHistory';
 import { useArtifactManager } from '@/hooks/useArtifactManager';
 
 import { extractCode } from '@/lib/extract-code';
+import { parseSSEStream } from '@/lib/sse-parser';
 import { AIModel, ImageAttachment, RendererType } from '@/types';
 import { FILE_UPLOAD_CONFIG } from '@/config/constants';
 
@@ -235,54 +236,22 @@ const GenesisApp = () => {
 
       const reader = response.body?.getReader();
       if (!reader) throw new Error('ReadableStream not supported.');
-      const decoder = new TextDecoder('utf-8');
       
       let aiContent = '';
-      let done = false;
-      let buffer = '';
       let finalUsageMetadata: any = null;
 
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (value) {
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data:')) {
-              const dataStr = trimmedLine.slice(5).trim();
-              if (dataStr === '[DONE]' || !dataStr) continue;
-              try {
-                const data = JSON.parse(dataStr);
-                if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
-                const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (textChunk) {
-                  aiContent += textChunk;
-                  chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
-                }
-              } catch (e) {}
-            }
+      await parseSSEStream(
+        reader,
+        (textChunk) => {
+          aiContent += textChunk;
+          chatStore.updateMessageContent(ui.activeChatId!, assistantMessageId, aiContent);
+        },
+        (metadata) => {
+          if (metadata) {
+            finalUsageMetadata = metadata;
           }
         }
-      }
-
-      if (buffer.trim().startsWith('data:')) {
-        try {
-          const dataStr = buffer.trim().slice(5).trim();
-          if (dataStr && dataStr !== '[DONE]') {
-            const data = JSON.parse(dataStr);
-            if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
-            const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textChunk) {
-              aiContent += textChunk;
-              chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
-            }
-          }
-        } catch (e) {}
-      }
+      );
 
       if (finalUsageMetadata) {
         chatStore.updateMessageTokens(ui.activeChatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);
@@ -394,54 +363,22 @@ const GenesisApp = () => {
 
       const reader = response.body?.getReader();
       if (!reader) throw new Error('ReadableStream not supported.');
-      const decoder = new TextDecoder('utf-8');
       
       let aiContent = '';
-      let done = false;
-      let buffer = '';
       let finalUsageMetadata: any = null;
 
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (value) {
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data:')) {
-              const dataStr = trimmedLine.slice(5).trim();
-              if (dataStr === '[DONE]' || !dataStr) continue;
-              try {
-                const data = JSON.parse(dataStr);
-                if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
-                const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (textChunk) {
-                  aiContent += textChunk;
-                  chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
-                }
-              } catch (e) {}
-            }
+      await parseSSEStream(
+        reader,
+        (textChunk) => {
+          aiContent += textChunk;
+          chatStore.updateMessageContent(ui.activeChatId!, assistantMessageId, aiContent);
+        },
+        (metadata) => {
+          if (metadata) {
+            finalUsageMetadata = metadata;
           }
         }
-      }
-
-      if (buffer.trim().startsWith('data:')) {
-        try {
-          const dataStr = buffer.trim().slice(5).trim();
-          if (dataStr && dataStr !== '[DONE]') {
-            const data = JSON.parse(dataStr);
-            if (data.usageMetadata) finalUsageMetadata = data.usageMetadata;
-            const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textChunk) {
-              aiContent += textChunk;
-              chatStore.updateMessageContent(ui.activeChatId, assistantMessageId, aiContent);
-            }
-          }
-        } catch (e) {}
-      }
+      );
 
       if (finalUsageMetadata) {
         chatStore.updateMessageTokens(ui.activeChatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);

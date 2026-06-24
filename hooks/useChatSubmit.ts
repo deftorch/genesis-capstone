@@ -2,6 +2,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useUIStore } from '@/lib/store/ui-store';
 import { extractCode } from '@/lib/extract-code';
+import { parseSSEStream } from '@/lib/sse-parser';
 import { ImageAttachment } from '@/types';
 
 interface UseChatSubmitOptions {
@@ -129,8 +130,6 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
       if (!response.body) throw new Error('ReadableStream not supported.');
 
       const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      
       let aiContent = '';
       const messageId = chatStore.addMessage(currentChatId!, {
         role: 'assistant',
@@ -138,61 +137,20 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
         tokens: 0,
       });
 
-      let done = false;
-      let buffer = '';
       let finalUsageMetadata: { promptTokenCount?: number; candidatesTokenCount?: number } | null = null;
 
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (value) {
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('data:')) {
-              const dataStr = trimmedLine.slice(5).trim();
-              if (dataStr === '[DONE]' || !dataStr) continue;
-              
-              try {
-                const data = JSON.parse(dataStr);
-                if (data.usageMetadata) {
-                  finalUsageMetadata = data.usageMetadata;
-                }
-                const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (textChunk) {
-                  aiContent += textChunk;
-                  chatStore.updateMessageContent(currentChatId!, messageId, aiContent);
-                }
-              } catch (e) {
-                console.warn('Error parsing stream chunk:', e);
-              }
-            }
+      await parseSSEStream(
+        reader,
+        (textChunk) => {
+          aiContent += textChunk;
+          chatStore.updateMessageContent(currentChatId!, messageId, aiContent);
+        },
+        (metadata) => {
+          if (metadata) {
+            finalUsageMetadata = metadata as any;
           }
         }
-      }
-
-      // Process any remaining buffer just in case
-      if (buffer.trim().startsWith('data:')) {
-        try {
-          const dataStr = buffer.trim().slice(5).trim();
-          if (dataStr && dataStr !== '[DONE]') {
-            const data = JSON.parse(dataStr);
-            if (data.usageMetadata) {
-              finalUsageMetadata = data.usageMetadata;
-            }
-            const textChunk = data.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textChunk) {
-              aiContent += textChunk;
-              chatStore.updateMessageContent(currentChatId!, messageId, aiContent);
-            }
-          }
-        } catch (e) {
-          // Ignore final parse error
-        }
-      }
+      );
 
       if (finalUsageMetadata) {
         const promptTokens = finalUsageMetadata.promptTokenCount ?? 0;
