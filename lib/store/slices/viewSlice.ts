@@ -35,6 +35,7 @@ export const createViewSlice: StateCreator<UIState, [], [], ViewSlice> = (set) =
       previousCode: '',
       showArtifact: false,
       isArtifactFullscreen: false,
+      artifactMode: 'standard',
       activeVersionNumber: null,
       inputMessage: '',
       attachedImages: [],

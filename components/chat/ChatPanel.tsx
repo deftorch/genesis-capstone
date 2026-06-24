@@ -112,7 +112,12 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
 
   return (
     <div
-      className={`flex-1 flex flex-col min-w-0 ${ui.showArtifact && !ui.isArtifactFullscreen ? 'hidden md:flex md:w-1/2' : ui.showArtifact && ui.isArtifactFullscreen ? 'hidden' : 'w-full'} bg-transparent`}
+      className={`flex-1 flex flex-col min-w-0 ${
+        !ui.showArtifact ? 'w-full' : 
+        ui.artifactMode === 'fullscreen' ? 'hidden' :
+        ui.artifactMode === 'wide' ? 'hidden md:flex md:w-1/4' : 
+        'hidden md:flex md:w-[40%]'
+      } bg-transparent transition-all duration-300`}
     >
       {/* Header */}
       <div className="border-b border-[#1e468c]/12 dark:border-white/10 p-4 flex items-center justify-between flex-shrink-0 bg-[#fffaf0]/28 dark:bg-transparent backdrop-blur-md dark:backdrop-blur-none">

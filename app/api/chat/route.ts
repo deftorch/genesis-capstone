@@ -82,7 +82,8 @@ CRITICAL CODE FORMAT RULES:
 
 p5.js RULES:
 - Must include setup() and draw() functions
-- Use createCanvas(400, 400) in setup() unless specified otherwise
+- ALWAYS use responsive canvas sizing: createCanvas(windowWidth, windowHeight)
+- ALWAYS include a windowResized() function containing resizeCanvas(windowWidth, windowHeight)
 - Visuals can be static or animated depending on user needs
 - Keep visuals clean and purposeful, not overly complex
 
@@ -142,12 +143,16 @@ Example p5.js code format:
 \`\`\`javascript
 // renderer: p5
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(windowWidth, windowHeight);
 }
 
 function draw() {
   background(220);
   // Your creative code here
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
 \`\`\`
 
