@@ -101,7 +101,7 @@ const P5Canvas: React.FC<P5CanvasProps> = ({ code, width = 400, height = 400, on
           const dataURL = canvas.toDataURL('image/png');
           window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
         }
-      } else if (event.data === 'startRecording') {
+          } else if (event.data && event.data.type === 'startRecording') {
         const canvas = document.querySelector('canvas');
         if (canvas) {
           recordedChunks = [];
@@ -113,7 +113,8 @@ const P5Canvas: React.FC<P5CanvasProps> = ({ code, width = 400, height = 400, on
             options = { mimeType: 'video/webm' };
           }
           try {
-            const stream = canvas.captureStream(30); // 30 FPS
+            const targetFps = event.data.fps || 30;
+            const stream = canvas.captureStream(targetFps);
             mediaRecorder = new MediaRecorder(stream, options);
             mediaRecorder.ondataavailable = function(e) {
               if (e.data && e.data.size > 0) {
