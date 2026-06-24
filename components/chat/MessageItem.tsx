@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import dynamic from 'next/dynamic';
 import {
@@ -59,6 +59,22 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   codeVersions,
 }) => {
   const ui = useUIStore();
+
+  const [previewWidth, setPreviewWidth] = useState(368);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!previewContainerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.contentRect.width > 0) {
+          setPreviewWidth(entry.contentRect.width);
+        }
+      }
+    });
+    observer.observe(previewContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const renderAiMessage = (content: string, messageIndex: number) => {
     const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\n([\s\S]*?)```/g;
@@ -130,13 +146,31 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               }
               ui.setActiveTab('preview');
             }}
-            className="border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#090514]/45 overflow-hidden text-gray-200 max-w-full font-mono text-[12px] cursor-pointer hover:border-[#60aaff]/35 transition-all shadow-md group/card relative"
+            className={`border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#090514]/45 overflow-hidden text-gray-200 font-mono text-[12px] cursor-pointer hover:border-[#60aaff]/35 transition-all shadow-md group/card relative ${
+              !ui.showArtifact ? 'w-full' : 'max-w-full'
+            }`}
           >
-            <div className="p-3 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center min-h-[220px] max-h-[300px] relative select-none preview-in-chat">
-              {rType === 'd3' && <D3Canvas code={code} width={380} height={200} />}
-              {rType === 'svg' && <SVGCanvas code={code} width={380} height={200} />}
-              {rType === 'mermaid' && <MermaidCanvas code={code} width={380} height={200} />}
-              {rType === 'p5' && <P5Canvas code={code} width={380} height={200} />}
+            <div 
+              ref={previewContainerRef}
+              className={`p-0 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center relative select-none preview-in-chat pointer-events-none ${
+                !ui.showArtifact 
+                  ? 'w-full aspect-[8/5]' 
+                  : 'h-[200px] sm:h-[240px] w-[280px] sm:w-[368px]'
+              }`}
+            >
+              <div 
+                className="absolute origin-center left-1/2 top-1/2"
+                style={{ 
+                  width: '800px', 
+                  height: '500px',
+                  transform: `translate(-50%, -50%) scale(${previewWidth / 800})`
+                }}
+              >
+                {rType === 'd3' && <D3Canvas code={code} />}
+                {rType === 'svg' && <SVGCanvas code={code} />}
+                {rType === 'mermaid' && <MermaidCanvas code={code} />}
+                {rType === 'p5' && <P5Canvas code={code} />}
+              </div>
             </div>
           </div>
         </div>
@@ -192,7 +226,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           </div>
         </div>
       )}
-      <div className="flex flex-col gap-1.5 max-w-[92%] sm:max-w-[80%] group">
+      <div className={`flex flex-col gap-1.5 group ${!isUser && !ui.showArtifact ? 'w-full max-w-full' : 'max-w-[92%] sm:max-w-[80%]'}`}>
         <div
           className={`p-4 rounded-xl shadow-sm border ${
             isUser
