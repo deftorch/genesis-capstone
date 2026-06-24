@@ -5,7 +5,7 @@ import { UIState } from '../ui-store';
 export interface CanvasSlice {
   showArtifact: boolean;
   isArtifactFullscreen: boolean;
-  artifactMode: 'standard' | 'wide' | 'fullscreen';
+  artifactMode: 'standard' | 'wide';
   p5Code: string;
   editableCode: string;
   activeRenderer: RendererType;
@@ -52,8 +52,8 @@ export const createCanvasSlice: StateCreator<UIState, [], [], CanvasSlice> = (se
   isTrueFullscreen: false,
 
   setShowArtifact: (show) => set({ showArtifact: show }),
-  setIsArtifactFullscreen: (fs) => set({ isArtifactFullscreen: fs, artifactMode: fs ? 'fullscreen' : 'standard' }),
-  setArtifactMode: (mode) => set({ artifactMode: mode, isArtifactFullscreen: mode === 'fullscreen' }),
+  setIsArtifactFullscreen: (fs) => set({ isArtifactFullscreen: fs, artifactMode: fs ? 'wide' : 'standard' }),
+  setArtifactMode: (mode) => set({ artifactMode: mode, isArtifactFullscreen: mode === 'wide' }),
   setP5Code: (code) => set({ p5Code: code }),
   setEditableCode: (code) => set({ editableCode: code }),
   setActiveRenderer: (renderer) => set({ activeRenderer: renderer }),

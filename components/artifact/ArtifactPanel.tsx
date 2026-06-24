@@ -395,13 +395,12 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
     <div
       ref={previewPanelRef}
       className={`${
-        ui.artifactMode === 'fullscreen' ? 'fixed inset-0 z-40 w-screen h-screen' : 
-        ui.artifactMode === 'wide' ? 'w-full md:w-3/4 h-full border-l border-[#1e468c]/12 dark:border-white/10' : 
+        ui.artifactMode === 'wide' ? 'fixed inset-0 z-40 w-screen h-screen' : 
         'w-full md:w-[60%] h-full border-l border-[#1e468c]/12 dark:border-white/10'
       } preview-panel-container flex flex-col overflow-hidden bg-white/90 dark:bg-[#070214]/92 backdrop-blur-xl transition-all duration-300 relative`}
     >
       {/* Row 1: Header / Title */}
-      {ui.artifactMode !== 'fullscreen' && (
+      {!ui.isTrueFullscreen && (
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e468c]/10 dark:border-white/10 select-none">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold uppercase tracking-wider text-[#1a6adf] dark:text-[#60aaff] plan-badge-custom px-2 py-0.5 rounded-md">
@@ -420,15 +419,15 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
               {ui.artifactMode === 'wide' ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             </button>
             <button
-              onClick={() => ui.setArtifactMode(ui.artifactMode === 'fullscreen' ? 'standard' : 'fullscreen')}
+              onClick={toggleTrueFullscreen}
               className="p-1.5 rounded-md transition-all cursor-pointer preview-panel-action"
-              title={ui.artifactMode === 'fullscreen' ? 'Exit fullscreen' : 'Fullscreen'}
+              title={ui.isTrueFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
             >
-              {ui.artifactMode === 'fullscreen' ? <Minimize size={15} /> : <Maximize size={15} />}
+              {ui.isTrueFullscreen ? <Minimize size={15} /> : <Maximize size={15} />}
             </button>
             <button
               onClick={() => ui.setShowMobileChatInput(!ui.showMobileChatInput)} // use the store action
-              className="block sm:hidden p-1.5 rounded-md transition-all cursor-pointer preview-panel-action"
+              className={`${ui.artifactMode === 'wide' ? 'block' : 'block sm:hidden'} p-1.5 rounded-md transition-all cursor-pointer preview-panel-action`}
               title="Toggle Chat Input"
             >
               <MessageSquare size={15} />
@@ -447,7 +446,7 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
       )}
 
       {/* Row 2: Toolbars / Tabs */}
-      {ui.artifactMode !== 'fullscreen' && (
+      {!ui.isTrueFullscreen && (
         <div className="flex items-center justify-between px-4 py-2 flex-wrap gap-2 border-b border-[#1e468c]/10 dark:border-white/10 bg-transparent select-none">
           <div className="flex items-center gap-3">
             {preferences.developerMode && (
@@ -666,9 +665,9 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
       {/* Main Viewport */}
       <div className="flex-1 overflow-hidden relative">
         {/* Floating Exit Fullscreen Button */}
-        {ui.artifactMode === 'fullscreen' && (
+        {ui.isTrueFullscreen && (
           <button
-            onClick={() => ui.setArtifactMode('standard')}
+            onClick={toggleTrueFullscreen}
             className="absolute top-4 right-4 z-50 p-2.5 rounded-xl bg-white/90 dark:bg-black/85 text-gray-700 dark:text-gray-200 border border-slate-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white shadow-lg backdrop-blur-md transition-all cursor-pointer flex items-center justify-center"
             title="Exit fullscreen"
           >
@@ -740,8 +739,8 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
             </div>
 
             {/* Floating mobile chat input overlay when previewing */}
-            {ui.showMobileChatInput && ui.artifactMode !== 'fullscreen' && (
-              <div className="block sm:hidden absolute bottom-6 left-4 right-4 z-40 group/input">
+            {ui.showMobileChatInput && (
+              <div className={`${ui.artifactMode === 'wide' ? 'block' : 'block sm:hidden'} absolute bottom-6 left-4 right-4 z-40 group/input max-w-3xl mx-auto`}>
                 {/* Pulsing gradient border wrapper */}
                 <div className={`absolute -inset-[1px] bg-gradient-to-r from-[#1a6adf] via-[#60aaff] to-[#1a6adf] dark:from-[#1a6adf] dark:via-[#60aaff] dark:to-[#1a6adf] rounded-2xl opacity-0 transition-opacity duration-500 blur-sm ${
                   !isLoading && ui.inputMessage.trim() ? 'opacity-30 group-focus-within/input:opacity-50' : 'group-hover/input:opacity-20'

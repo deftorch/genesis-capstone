@@ -96,7 +96,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 <span className="group-open/details:rotate-90 transition-transform duration-200">
                   ▶
                 </span>
-                View Process
+                View Explanation
               </summary>
               <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-left mt-2 pl-4 border-l-2 border-gray-200 dark:border-white/10 opacity-80">
                 <ReactMarkdown

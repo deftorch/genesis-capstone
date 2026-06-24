@@ -114,8 +114,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
     <div
       className={`flex-1 flex flex-col min-w-0 ${
         !ui.showArtifact ? 'w-full' : 
-        ui.artifactMode === 'fullscreen' ? 'hidden' :
-        ui.artifactMode === 'wide' ? 'hidden md:flex md:w-1/4' : 
+        ui.artifactMode === 'wide' ? 'hidden' : 
         'hidden md:flex md:w-[40%]'
       } bg-transparent transition-all duration-300`}
     >
