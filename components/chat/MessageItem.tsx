@@ -61,10 +61,10 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   const ui = useUIStore();
 
   const [previewWidth, setPreviewWidth] = useState(368);
-  const previewContainerRef = useRef<HTMLDivElement>(null);
+  const [previewNode, setPreviewNode] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!previewContainerRef.current) return;
+    if (!previewNode) return;
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.contentRect.width > 0) {
@@ -72,9 +72,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         }
       }
     });
-    observer.observe(previewContainerRef.current);
+    observer.observe(previewNode);
     return () => observer.disconnect();
-  }, []);
+  }, [previewNode]);
 
   const renderAiMessage = (content: string, messageIndex: number) => {
     const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\n([\s\S]*?)```/g;
@@ -151,7 +151,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             }`}
           >
             <div 
-              ref={previewContainerRef}
+              ref={setPreviewNode}
               className={`p-0 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center relative select-none preview-in-chat pointer-events-none ${
                 !ui.showArtifact 
                   ? 'w-full aspect-[8/5]' 
