@@ -152,18 +152,18 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           >
             <div 
               ref={setPreviewNode}
-              className={`p-0 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center relative select-none preview-in-chat pointer-events-none ${
+              className={`p-0 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center relative select-none preview-in-chat pointer-events-none aspect-[8/5] ${
                 !ui.showArtifact 
-                  ? 'w-full aspect-[8/5]' 
-                  : 'h-[200px] sm:h-[240px] w-[280px] sm:w-[368px]'
+                  ? 'w-full' 
+                  : 'w-[280px] sm:w-[368px]'
               }`}
             >
               <div 
-                className="absolute origin-center left-1/2 top-1/2"
+                className="absolute left-0 top-0 origin-top-left"
                 style={{ 
                   width: '800px', 
                   height: '500px',
-                  transform: `translate(-50%, -50%) scale(${previewWidth / 800})`
+                  transform: `scale(${previewWidth / 800})`
                 }}
               >
                 {rType === 'd3' && <D3Canvas code={code} />}
@@ -200,32 +200,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
   return (
     <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in w-full`}>
-      {!isUser && (
-        <div className="hidden sm:flex w-7 h-7 rounded-full bg-[#1a6adf]/15 border border-[#1a6adf]/30 dark:bg-[#60aaff]/15 dark:border-[#60aaff]/30 items-center justify-center flex-shrink-0 mt-1 select-none">
-          <div className="w-6 h-6 flex items-center justify-center">
-            <svg className="w-full h-full" viewBox="0 0 32 32" fill="none">
-              <defs>
-                <linearGradient id={`genesisGradMsg-${index}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#3b82f6" />
-                  <stop offset="50%" stopColor="#60aaff" />
-                  <stop offset="100%" stopColor="#8b5cf6" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M26 16C26 21.5228 21.5228 26 16 26C10.4772 26 6 21.5228 6 16C6 10.4772 10.4772 6 16 6C19.3431 6 22.2868 7.6393 24.1002 10.1584"
-                stroke={`url(#genesisGradMsg-${index})`}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <path d="M16 16H25" stroke={`url(#genesisGradMsg-${index})`} strokeWidth="2.5" strokeLinecap="round" />
-              <path
-                d="M16 11L17.5 14.5L21 16L17.5 17.5L16 21L14.5 17.5L11 16L14.5 14.5L16 11Z"
-                fill={`url(#genesisGradMsg-${index})`}
-              />
-            </svg>
-          </div>
-        </div>
-      )}
       <div className={`flex flex-col gap-1.5 group ${!isUser && !ui.showArtifact ? 'w-full max-w-full' : 'max-w-[92%] sm:max-w-[80%]'}`}>
         <div
           className={`p-4 rounded-xl shadow-sm border ${

@@ -196,7 +196,7 @@ const P5Canvas: React.FC<P5CanvasProps> = ({ code, width = 400, height = 400, on
   }
 
   return (
-    <div className="relative w-full h-full flex items-center justify-center p-4">
+    <div className="relative w-full h-full flex items-center justify-center">
       <iframe
         ref={iframeRef}
         srcDoc={htmlContent}
