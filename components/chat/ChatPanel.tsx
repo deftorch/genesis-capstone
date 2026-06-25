@@ -191,7 +191,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {!ui.showArtifact && ui.p5Code && (
+          {!ui.showArtifact && ui.p5Code && ui.currentView === 'chat' && (
             <button
               onClick={() => ui.setShowArtifact(true)}
               className="p-2 bg-[#fffaf0]/80 dark:bg-[#0f0a1e]/85 border border-[#1e468c]/12 dark:border-white/10 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer shadow-sm backdrop-blur-sm"
