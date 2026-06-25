@@ -137,7 +137,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
         tokens: 0,
       });
 
-      let finalUsageMetadata: { promptTokenCount?: number; candidatesTokenCount?: number } | null = null;
+      let finalUsageMetadata: any = null;
 
       await parseSSEStream(
         reader,
