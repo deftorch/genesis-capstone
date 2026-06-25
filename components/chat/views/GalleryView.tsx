@@ -46,7 +46,7 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
               Start creating with AI and your p5.js / D3.js / SVG / Mermaid creations will appear here
             </p>
             <button
-              onClick={onStartNewChat}
+              onClick={() => onStartNewChat()}
               className="mt-6 px-6 py-3 bg-black dark:bg-white dark:text-black text-white rounded-xl hover:scale-102 transition-transform flex items-center gap-2 cursor-pointer"
             >
               <Plus size={18} /> New Creation
