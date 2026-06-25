@@ -63,7 +63,7 @@ export const ChatsView: React.FC<ChatsViewProps> = ({
             </button>
 
             <button
-              onClick={onStartNewChat}
+              onClick={() => onStartNewChat()}
               className="px-4 py-2 bg-[#1a6adf] dark:bg-white text-white dark:text-black rounded-xl hover:bg-[#1a6adf]/90 dark:hover:bg-gray-100 transition-colors flex items-center gap-2 cursor-pointer text-sm font-medium shadow-sm"
             >
               <Plus size={18} /> New chat
@@ -98,7 +98,7 @@ export const ChatsView: React.FC<ChatsViewProps> = ({
               Start a conversation with Genesis and it will appear here
             </p>
             <button
-              onClick={onStartNewChat}
+              onClick={() => onStartNewChat()}
               className="mt-6 px-6 py-3 bg-[#1a6adf] dark:bg-white text-white dark:text-black rounded-xl hover:opacity-90 transition-opacity font-medium shadow-sm"
             >
               Create first chat
