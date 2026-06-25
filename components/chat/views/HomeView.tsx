@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, Loader2, Plus, Send, Layout, Film, Image as ImageIcon, Play, Code, BarChart3, Network, PieChart, Shapes, GitFork, Clock } from 'lucide-react';
+import { ChevronDown, Loader2, Paperclip, Send, Layout, Film, Image as ImageIcon, Play, Code, BarChart3, Network, PieChart, Shapes, GitFork, Clock } from 'lucide-react';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useToast } from '@/lib/store/toast-store';
@@ -196,7 +196,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors disabled:opacity-50 cursor-pointer"
                 title="Attach image"
               >
-                {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Paperclip size={16} />}
               </button>
               {attachedImages.length > 0 && (
                 <span className="text-[10px] text-gray-400 font-mono">

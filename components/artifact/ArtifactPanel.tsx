@@ -38,6 +38,7 @@ import { useChatStore } from '@/lib/store/chat-store';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useToast } from '@/lib/store/toast-store';
 import { CodeEditor } from './CodeEditor';
+import { getCategoryInfo } from '@/components/chat/utils';
 
 const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false });
 const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
@@ -417,9 +418,16 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
       {!ui.isTrueFullscreen && (
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e468c]/10 dark:border-white/10 select-none">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-[#1a6adf] dark:text-[#60aaff] plan-badge-custom px-2 py-0.5 rounded-md">
-              Artifact
-            </span>
+            {(() => {
+              const category = getCategoryInfo(ui.activeRenderer || 'p5', ui.p5Code || '', getFriendlyTitle());
+              const CategoryIcon = category.icon;
+              return (
+                <span className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md ${category.colorClass}`}>
+                  <CategoryIcon size={12} />
+                  <span>{category.name}</span>
+                </span>
+              );
+            })()}
             <h2 className="text-sm font-semibold text-gray-800 dark:text-white truncate max-w-[150px] sm:max-w-[280px]">
               {getFriendlyTitle()}
             </h2>
