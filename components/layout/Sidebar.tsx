@@ -13,6 +13,9 @@ import {
   Trash2,
   Settings,
   MoreHorizontal,
+  Star,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 import { useUIStore } from '@/lib/store/ui-store';
@@ -38,6 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
+  const [isFavoritesOpen, setIsFavoritesOpen] = useState(true);
 
   const startRename = (chatId: string, currentTitle: string) => {
     setRenamingChatId(chatId);
@@ -57,6 +61,118 @@ export const Sidebar: React.FC<SidebarProps> = ({
         (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       )
     : [];
+
+  const starredChats = sortedChats.filter(c => c.isStarred);
+  const unstarredChats = sortedChats.filter(c => !c.isStarred);
+
+  const renderChatItem = (chat: any) => (
+    <div
+      key={chat.id}
+      className={`group flex items-center gap-1 px-2 py-2 rounded-lg transition-colors cursor-pointer ${ui.activeChatId === chat.id && ui.currentView === 'chat' ? 'bg-[#1a6adf]/18 dark:bg-white/10 text-[#0a1628] dark:text-white shadow-sm' : 'text-[#3a6aaa] hover:text-[#0a1628] hover:bg-[#1a6adf]/14 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5'}`}
+    >
+      {renamingChatId === chat.id ? (
+        <div className="flex-1 flex items-center gap-1">
+          <input
+            type="text"
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && confirmRename()}
+            className="flex-1 text-xs px-2 py-1 bg-white dark:bg-[#1a1525] border border-gray-300 dark:border-white/10 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#60aaff]"
+            autoFocus
+          />
+          <button
+            onClick={confirmRename}
+            className="p-1 hover:bg-gray-300 dark:hover:bg-white/10 rounded"
+          >
+            <Check size={12} />
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="flex-1 min-w-0" onClick={() => onSelectChat(chat.id)}>
+            <div className="text-sm font-medium truncate">{chat.title}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-500 flex items-center gap-1 truncate">
+              {formatDate(chat.updatedAt)} · {chat.messages.length} msgs
+              {chat.projectId &&
+                (() => {
+                  const p = chatStore.projects.find((proj) => proj.id === chat.projectId);
+                  return p ? (
+                    <>
+                      ·{' '}
+                      <span className="text-[#1a6adf] dark:text-[#60aaff] truncate font-medium">
+                        #{p.name}
+                      </span>
+                    </>
+                  ) : null;
+                })()}
+            </div>
+          </div>
+          <div className="flex-shrink-0 relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                ui.setChatMenuOpenId(ui.chatMenuOpenId === chat.id ? null : chat.id);
+              }}
+              className={`p-1 rounded transition-colors cursor-pointer ${ui.chatMenuOpenId === chat.id ? 'bg-gray-200 dark:bg-white/15 text-gray-700 dark:text-white' : 'opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'}`}
+            >
+              <MoreHorizontal size={14} />
+            </button>
+
+            {ui.chatMenuOpenId === chat.id && (
+              <>
+                <div className="fixed inset-0 z-30" onClick={() => ui.setChatMenuOpenId(null)} />
+                <div className="absolute right-0 top-7 z-40 w-44 bg-white dark:bg-[#1a1525] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-fade-in text-gray-900 dark:text-white">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      ui.setChatMenuOpenId(null);
+                      ui.setMovingChatId(chat.id);
+                      ui.setIsMoveToProjectOpen(true);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer text-left text-gray-700 dark:text-gray-300"
+                  >
+                    <FolderOpen size={13} /> Move to project
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      ui.setChatMenuOpenId(null);
+                      chatStore.starChat(chat.id);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer text-left text-gray-700 dark:text-gray-300"
+                  >
+                    <Star size={13} className={chat.isStarred ? 'text-amber-400 fill-amber-400' : ''} />
+                    {chat.isStarred ? 'Unstar' : 'Star'}
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      ui.setChatMenuOpenId(null);
+                      startRename(chat.id, chat.title);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer text-left text-gray-700 dark:text-gray-300"
+                  >
+                    <Pencil size={13} /> Rename
+                  </button>
+                  <div className="border-t border-gray-100 dark:border-white/5" />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      ui.setChatMenuOpenId(null);
+                      onDeleteChat(chat.id);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer text-left font-medium"
+                  >
+                    <Trash2 size={13} /> Delete
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -171,10 +287,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Sidebar Content - Always show chat history */}
             <div className="border-t border-[#1e468c]/12 dark:border-white/10 pt-4 flex-1 min-h-0 overflow-hidden flex flex-col">
-              <h3 className="text-xs font-semibold text-[#3a6aaa] dark:text-gray-500 mb-2 px-3 flex items-center gap-1">
-                <Clock size={12} /> RECENT CREATIONS
-              </h3>
-              <div className="space-y-1 overflow-y-auto flex-1 pr-1">
+              <div className="space-y-1 overflow-y-auto flex-1 pr-1 pb-4">
                 {!hydrated ? (
                   <div className="text-sm text-[#3a6aaa] dark:text-gray-400 px-3 py-2">
                     Loading...
@@ -186,103 +299,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <p className="text-xs mt-1">Start a new creation!</p>
                   </div>
                 ) : (
-                  sortedChats.map((chat) => (
-                    <div
-                      key={chat.id}
-                      className={`group flex items-center gap-1 px-2 py-2 rounded-lg transition-colors cursor-pointer ${ui.activeChatId === chat.id && ui.currentView === 'chat' ? 'bg-[#1a6adf]/18 dark:bg-white/10 text-[#0a1628] dark:text-white shadow-sm' : 'text-[#3a6aaa] hover:text-[#0a1628] hover:bg-[#1a6adf]/14 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5'}`}
-                    >
-                      {renamingChatId === chat.id ? (
-                        <div className="flex-1 flex items-center gap-1">
-                          <input
-                            type="text"
-                            value={renameValue}
-                            onChange={(e) => setRenameValue(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && confirmRename()}
-                            className="flex-1 text-xs px-2 py-1 bg-white dark:bg-[#1a1525] border border-gray-300 dark:border-white/10 rounded text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-[#60aaff]"
-                            autoFocus
-                          />
-                          <button
-                            onClick={confirmRename}
-                            className="p-1 hover:bg-gray-300 dark:hover:bg-white/10 rounded"
-                          >
-                            <Check size={12} />
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <div className="flex-1 min-w-0" onClick={() => onSelectChat(chat.id)}>
-                            <div className="text-sm font-medium truncate">{chat.title}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-500 flex items-center gap-1 truncate">
-                              {formatDate(chat.updatedAt)} · {chat.messages.length} msgs
-                              {chat.projectId &&
-                                (() => {
-                                  const p = chatStore.projects.find((proj) => proj.id === chat.projectId);
-                                  return p ? (
-                                    <>
-                                      ·{' '}
-                                      <span className="text-[#1a6adf] dark:text-[#60aaff] truncate font-medium">
-                                        #{p.name}
-                                      </span>
-                                    </>
-                                  ) : null;
-                                })()}
-                            </div>
+                  <>
+                    {/* Favorites Section */}
+                    {starredChats.length > 0 && (
+                      <div className="mb-4">
+                        <button
+                          onClick={() => setIsFavoritesOpen(!isFavoritesOpen)}
+                          className="w-full flex items-center gap-1 text-xs font-semibold text-[#3a6aaa] dark:text-gray-500 mb-1 px-3 hover:text-gray-900 dark:hover:text-gray-300 transition-colors cursor-pointer group"
+                        >
+                          <Star size={12} /> FAVORITES
+                          <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-gray-400">
+                            {isFavoritesOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                          </span>
+                        </button>
+                        {isFavoritesOpen && (
+                          <div className="space-y-1">
+                            {starredChats.map(renderChatItem)}
                           </div>
-                          <div className="flex-shrink-0 relative">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                ui.setChatMenuOpenId(ui.chatMenuOpenId === chat.id ? null : chat.id);
-                              }}
-                              className={`p-1 rounded transition-colors cursor-pointer ${ui.chatMenuOpenId === chat.id ? 'bg-gray-200 dark:bg-white/15 text-gray-700 dark:text-white' : 'opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'}`}
-                            >
-                              <MoreHorizontal size={14} />
-                            </button>
+                        )}
+                      </div>
+                    )}
 
-                            {ui.chatMenuOpenId === chat.id && (
-                              <>
-                                <div className="fixed inset-0 z-30" onClick={() => ui.setChatMenuOpenId(null)} />
-                                <div className="absolute right-0 top-7 z-40 w-44 bg-white dark:bg-[#1a1525] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-fade-in text-gray-900 dark:text-white">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      ui.setChatMenuOpenId(null);
-                                      ui.setMovingChatId(chat.id);
-                                      ui.setIsMoveToProjectOpen(true);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer text-left text-gray-700 dark:text-gray-300"
-                                  >
-                                    <FolderOpen size={13} /> Move to project
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      ui.setChatMenuOpenId(null);
-                                      startRename(chat.id, chat.title);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-gray-100 dark:hover:bg-white/5 transition-colors cursor-pointer text-left text-gray-700 dark:text-gray-300"
-                                  >
-                                    <Pencil size={13} /> Rename
-                                  </button>
-                                  <div className="border-t border-gray-100 dark:border-white/5" />
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      ui.setChatMenuOpenId(null);
-                                      onDeleteChat(chat.id);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors cursor-pointer text-left font-medium"
-                                  >
-                                    <Trash2 size={13} /> Delete
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))
+                    {/* Recent Creations Section */}
+                    {unstarredChats.length > 0 && (
+                      <div>
+                        <h3 className="text-xs font-semibold text-[#3a6aaa] dark:text-gray-500 mb-2 px-3 flex items-center gap-1">
+                          <Clock size={12} /> RECENT CREATIONS
+                        </h3>
+                        <div className="space-y-1">
+                          {unstarredChats.map(renderChatItem)}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>

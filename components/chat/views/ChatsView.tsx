@@ -106,9 +106,10 @@ export const ChatsView: React.FC<ChatsViewProps> = ({
           </div>
         ) : (
           (() => {
-            const filtered = sortedChats.filter((c) =>
-              c.title.toLowerCase().includes(chatSearchQuery.toLowerCase())
-            );
+            const filtered = chatSearchQuery.trim()
+              ? chatStore.searchChats(chatSearchQuery)
+                  .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+              : sortedChats;
 
             if (filtered.length === 0) {
               return <div className="text-center py-10 text-gray-400">No chats match "{chatSearchQuery}"</div>;

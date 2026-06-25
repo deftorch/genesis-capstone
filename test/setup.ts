@@ -30,3 +30,12 @@ if (typeof window !== 'undefined') {
     }),
   });
 }
+
+// Mock ResizeObserver for components using responsive sizing (e.g. MessageItem preview)
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as any;
+}
