@@ -16,7 +16,7 @@ export interface ViewSlice {
 }
 
 export const createViewSlice: StateCreator<UIState, [], [], ViewSlice> = (set) => ({
-  sidebarOpen: true,
+  sidebarOpen: false,
   currentView: 'home',
   activeChatId: null,
   activeProjectId: null,

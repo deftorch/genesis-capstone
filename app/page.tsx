@@ -200,6 +200,40 @@ const GenesisApp = () => {
 
 
 
+  if (!hydrated) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#f8fafc] dark:bg-[#0b0f19]">
+        <div className="flex flex-col items-center gap-4 animate-fade-in">
+          <div className="w-12 h-12 flex items-center justify-center animate-pulse">
+            <svg className="w-full h-full" viewBox="0 0 32 32" fill="none">
+              <defs>
+                <linearGradient id="genesisGradLoading" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#3b82f6" />
+                  <stop offset="50%" stopColor="#60aaff" />
+                  <stop offset="100%" stopColor="#8b5cf6" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M26 16C26 21.5228 21.5228 26 16 26C10.4772 26 6 21.5228 6 16C6 10.4772 10.4772 6 16 6C19.3431 6 22.2868 7.6393 24.1002 10.1584"
+                stroke="url(#genesisGradLoading)"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <path d="M16 16H25" stroke="url(#genesisGradLoading)" strokeWidth="2.5" strokeLinecap="round" />
+              <path
+                d="M16 11L17.5 14.5L21 16L17.5 17.5L16 21L14.5 17.5L11 16L14.5 14.5L16 11Z"
+                fill="url(#genesisGradLoading)"
+              />
+            </svg>
+          </div>
+          <div className="text-sm font-medium text-gray-500 dark:text-gray-400 animate-pulse">
+            Loading workspace...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <AppShell

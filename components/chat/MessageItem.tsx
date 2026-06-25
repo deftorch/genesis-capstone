@@ -107,31 +107,23 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             }
           `}</style>
           {textBefore && (
-            <details className="group/details mb-2">
-              <summary className="cursor-pointer text-xs font-medium text-gray-500 dark:text-gray-400 select-none flex items-center gap-1.5 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
-                <span className="group-open/details:rotate-90 transition-transform duration-200">
-                  ▶
-                </span>
-                View Explanation
-              </summary>
-              <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-left mt-2 pl-4 border-l-2 border-gray-200 dark:border-white/10 opacity-80">
-                <ReactMarkdown
-                  components={{
-                    p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
-                    strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-white" {...props} />,
-                    em: ({ ...props }) => <em className="italic" {...props} />,
-                    ul: ({ ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-left" {...props} />,
-                    ol: ({ ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1 text-left" {...props} />,
-                    li: ({ ...props }) => <li className="text-sm" {...props} />,
-                    code: ({ ...props }) => (
-                      <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded text-xs font-mono" {...props} />
-                    ),
-                  }}
-                >
-                  {textBefore}
-                </ReactMarkdown>
-              </div>
-            </details>
+            <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-left mb-3">
+              <ReactMarkdown
+                components={{
+                  p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+                  strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-white" {...props} />,
+                  em: ({ ...props }) => <em className="italic" {...props} />,
+                  ul: ({ ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-left" {...props} />,
+                  ol: ({ ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1 text-left" {...props} />,
+                  li: ({ ...props }) => <li className="text-sm" {...props} />,
+                  code: ({ ...props }) => (
+                    <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded text-xs font-mono" {...props} />
+                  ),
+                }}
+              >
+                {textBefore}
+              </ReactMarkdown>
+            </div>
           )}
 
           <div

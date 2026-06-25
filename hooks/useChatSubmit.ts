@@ -179,7 +179,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
         ui.setEditableCode(extracted.code);
         ui.setActiveRenderer(extracted.renderer);
         ui.setActiveTab('preview');
-        ui.setShowArtifact(true);
+        // ui.setShowArtifact(true); // User requested not to auto-open
 
         const chat = chatStore.chats.find((c) => c.id === currentChatId);
         chatStore.addArtifact({
@@ -311,7 +311,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
         ui.setEditableCode(extracted.code);
         ui.setActiveRenderer(extracted.renderer);
         ui.setActiveTab('preview');
-        ui.setShowArtifact(true);
+        // ui.setShowArtifact(true); // User requested not to auto-open
         chatStore.addArtifact({
           chatId: chatId,
           chatTitle: updatedChat.title || 'Untitled',
