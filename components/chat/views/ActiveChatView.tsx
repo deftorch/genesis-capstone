@@ -71,9 +71,9 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
         />
       </div>
 
-      <div className="border-t border-[#1e468c]/12 dark:border-white/10 p-4 flex-shrink-0 bg-transparent">
-        <div className="max-w-3xl mx-auto">
-          <div className="glass-panel rounded-2xl p-4 flex flex-col focus-within:border-[#1a6adf]/45 focus-within:shadow-[0_0_0_3px_rgba(26,106,223,0.10)] dark:focus-within:border-white/20 dark:focus-within:shadow-none transition-all duration-200 shadow-sm">
+      <div className="border-t border-[#1e468c]/12 dark:border-white/10 p-4 flex-shrink-0 bg-transparent w-full">
+        <div className="max-w-3xl mx-auto w-full">
+          <div className="glass-panel w-full rounded-2xl p-4 flex flex-col focus-within:border-[#1a6adf]/45 focus-within:shadow-[0_0_0_3px_rgba(26,106,223,0.10)] dark:focus-within:border-white/20 dark:focus-within:shadow-none transition-all duration-200 shadow-sm">
             <ChatImagePreview 
               images={attachedImages} 
               onRemoveImage={removeAttachedImage} 
