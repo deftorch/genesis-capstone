@@ -26,7 +26,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
 
     // Remove all theme classes first
-    root.classList.remove('dark', 'theme-rose', 'theme-blue', 'theme-green', 'theme-purple', 'theme-custom');
+    root.classList.remove('dark');
 
     if (theme === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -38,15 +38,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
       return () => mediaQuery.removeEventListener('change', updateTheme);
     } else if (theme === 'dark') {
       root.classList.add('dark');
-    } else if (theme === 'custom' && preferences.customTheme) {
-      root.classList.add('theme-custom');
-      // Apply custom CSS variables
-      root.style.setProperty('--custom-primary', preferences.customTheme.primary);
-      root.style.setProperty('--custom-background', preferences.customTheme.background);
-      root.style.setProperty('--custom-foreground', preferences.customTheme.foreground);
-      root.style.setProperty('--custom-accent', preferences.customTheme.accent);
     }
-  }, [preferences.theme, preferences.customTheme]);
+  }, [preferences.theme]);
 
   // Apply font size changes
   React.useEffect(() => {

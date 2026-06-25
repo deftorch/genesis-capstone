@@ -73,20 +73,7 @@ describe('SettingsModal — Store Logic & Settings Management', () => {
     expect(useSettingsStore.getState().preferences.theme).toBe('system');
   });
 
-  it('should save and apply custom theme colors', () => {
-    const { setTheme } = useSettingsStore.getState();
-    const customColors = {
-      primary: '280 70% 50%',
-      background: '0 0% 5%',
-      foreground: '0 0% 95%',
-      accent: '280 70% 20%',
-    };
 
-    setTheme('custom', customColors);
-    const state = useSettingsStore.getState();
-    expect(state.preferences.theme).toBe('custom');
-    expect(state.preferences.customTheme).toEqual(customColors);
-  });
 
   it('should toggle developer mode on and off', () => {
     const { updatePreferences } = useSettingsStore.getState();

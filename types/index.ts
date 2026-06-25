@@ -104,13 +104,7 @@ export interface APIKeyConfig {
 }
 
 export interface UserPreferences {
-  theme: 'light' | 'dark' | 'system' | 'custom';
-  customTheme?: {
-    primary: string;
-    background: string;
-    foreground: string;
-    accent: string;
-  };
+  theme: 'light' | 'dark' | 'system';
   fontSize: 'small' | 'medium' | 'large';
   language: string;
   defaultModel: AIModel;

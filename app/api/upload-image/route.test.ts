@@ -87,6 +87,11 @@ describe('/api/upload-image API Route', () => {
   });
 
   it('should upload successfully to Supabase Storage when magic bytes are correct', async () => {
+    const oldUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const oldKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://mock.supabase.co';
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'mock-key';
+
     server.use(
       http.post('https://mock.supabase.co/storage/v1/object/genesis-images/*', () => {
         return HttpResponse.json({ Key: 'test-key' });
@@ -113,5 +118,8 @@ describe('/api/upload-image API Route', () => {
     expect(data.success).toBe(true);
     expect(data.provider).toBe('supabase');
     expect(data.url).toContain('https://mock.supabase.co/storage/v1/object/public/genesis-images/');
+
+    process.env.NEXT_PUBLIC_SUPABASE_URL = oldUrl;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = oldKey;
   });
 });

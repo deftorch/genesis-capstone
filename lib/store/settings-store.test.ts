@@ -53,20 +53,6 @@ describe('settings-store.ts', () => {
       expect(document.documentElement.classList.contains('dark')).toBe(false);
     });
 
-    it('should handle custom theme with color settings', () => {
-      const { setTheme } = useSettingsStore.getState();
-      const customColors = {
-        primary: '200 80% 50%',
-        background: '0 0% 100%',
-        foreground: '0 0% 0%',
-        accent: '200 80% 90%',
-      };
-
-      setTheme('custom', customColors);
-      const state = useSettingsStore.getState();
-      expect(state.preferences.theme).toBe('custom');
-      expect(state.preferences.customTheme).toEqual(customColors);
-    });
   });
 
   describe('API Keys actions', () => {

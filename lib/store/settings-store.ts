@@ -8,7 +8,7 @@ interface SettingsStore {
   
   // Preferences actions
   updatePreferences: (preferences: Partial<UserPreferences>) => void;
-  setTheme: (theme: 'light' | 'dark' | 'system' | 'custom', customTheme?: { primary: string; background: string; foreground: string; accent: string }) => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
   
   // API Keys actions
   addAPIKey: (config: APIKeyConfig) => void;
@@ -41,9 +41,9 @@ export const useSettingsStore = create<SettingsStore>()(
         }));
       },
 
-      setTheme: (theme, customTheme) => {
+      setTheme: (theme) => {
         set((state) => ({
-          preferences: { ...state.preferences, theme, customTheme },
+          preferences: { ...state.preferences, theme },
         }));
         
         // Apply theme to document
