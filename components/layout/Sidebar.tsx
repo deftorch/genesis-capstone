@@ -28,15 +28,11 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   hydrated,
 }) => {
-  const { onSelectChat, onStartNewChat, onDeleteChat, onOpenGallery } = (() => {
-    const nav = useChatNavigation();
-    return {
-      onSelectChat: nav.selectChat,
-      onStartNewChat: () => nav.startNewChat(),
-      onDeleteChat: nav.deleteChat,
-      onOpenGallery: nav.openGallery,
-    };
-  })();
+  const nav = useChatNavigation();
+  const onSelectChat = nav.selectChat;
+  const onStartNewChat = () => nav.startNewChat();
+  const onDeleteChat = nav.deleteChat;
+  const onOpenGallery = nav.openGallery;
   const ui = useUIStore();
   const chatStore = useChatStore();
 
