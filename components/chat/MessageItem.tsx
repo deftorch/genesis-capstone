@@ -155,7 +155,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               className={`p-0 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center relative select-none preview-in-chat pointer-events-none aspect-[8/5] ${
                 !ui.showArtifact 
                   ? 'w-full' 
-                  : 'w-[280px] sm:w-[368px]'
+                  : 'w-[280px] sm:w-[368px] max-w-full'
               }`}
             >
               <div 
