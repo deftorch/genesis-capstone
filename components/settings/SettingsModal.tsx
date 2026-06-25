@@ -23,25 +23,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const [clearDataModalOpen, setClearDataModalOpen] = React.useState(false);
   const [importModalOpen, setImportModalOpen] = React.useState(false);
   const [importData, setImportData] = React.useState<any>(null);
-  const [showCustomThemeBuilder, setShowCustomThemeBuilder] = React.useState(false);
   const [geminiKeyInput, setGeminiKeyInput] = React.useState('');
   const { preferences, apiKeys, updatePreferences, setTheme, addAPIKey, removeAPIKey, getAPIKey } = useSettingsStore();
   const { chats, importChats } = useChatStore();
   const { success, error } = useToast();
-  
-  const [customColors, setCustomColors] = React.useState({
-    primary: '217.2 91.2% 59.8%',
-    background: '0 0% 100%',
-    foreground: '240 10% 3.9%',
-    accent: '240 4.8% 95.9%',
-  });
-
-  // Initialize custom colors from preferences
-  React.useEffect(() => {
-    if (preferences.customTheme) {
-      setCustomColors(preferences.customTheme);
-    }
-  }, [preferences.customTheme]);
 
   const tabs = [
     { id: 'general' as TabType, label: 'General', icon: Settings2 },
@@ -50,19 +35,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     { id: 'developer' as TabType, label: 'Developer', icon: Key },
   ];
 
-  const handleThemeChange = (theme: 'light' | 'dark' | 'system' | 'custom') => {
-    if (theme === 'custom') {
-      setShowCustomThemeBuilder(true);
-    } else {
-      setTheme(theme);
-      success('Theme Updated', `Theme changed to ${theme}`);
-    }
-  };
-
-  const handleSaveCustomTheme = () => {
-    setTheme('custom', customColors);
-    setShowCustomThemeBuilder(false);
-    success('Custom Theme Saved', 'Your custom theme has been applied');
+  const handleThemeChange = (theme: 'light' | 'dark' | 'system') => {
+    setTheme(theme);
+    success('Theme Updated', `Theme changed to ${theme}`);
   };
 
   const handleExportData = () => {
@@ -133,13 +108,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
 
       // Import settings (excluding API keys for security)
       if (importData.settings) {
-        const { theme, autoSave, showTokenCount, enableNotifications, customTheme } = importData.settings;
+        const { theme, autoSave, showTokenCount, enableNotifications } = importData.settings;
         updatePreferences({
           theme: theme || 'system',
           autoSave: autoSave !== undefined ? autoSave : true,
           showTokenCount: showTokenCount !== undefined ? showTokenCount : false,
           enableNotifications: enableNotifications !== undefined ? enableNotifications : true,
-          customTheme: customTheme || undefined,
         });
       }
 
@@ -290,8 +264,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   {/* Theme Selection */}
                   <div>
                     <label className="font-medium block mb-3">Theme</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-                      {(['light', 'dark', 'system', 'custom'] as const).map((theme) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                      {(['light', 'dark', 'system'] as const).map((theme) => (
                         <button
                           key={theme}
                           onClick={() => handleThemeChange(theme)}
@@ -308,138 +282,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                               "w-10 h-10 rounded-lg flex items-center justify-center shadow-sm transition-all duration-300",
                               theme === 'light' && "bg-white border border-gray-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
                               theme === 'dark' && "bg-[#0b0c14] border border-white/10 shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]",
-                              theme === 'system' && "bg-gradient-to-b from-[#4a5568] to-[#1a202c] border border-gray-700/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]",
-                              theme === 'custom' && "bg-gradient-to-tr from-amber-500 via-rose-500 to-violet-600 border border-rose-500/20"
+                              theme === 'system' && "bg-gradient-to-b from-[#4a5568] to-[#1a202c] border border-gray-700/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]"
                             )}>
                               {theme === 'light' && <Sun className="h-5 w-5 text-amber-500 fill-amber-400 animate-[spin_24s_linear_infinite]" strokeWidth={2.2} />}
                               {theme === 'dark' && <Moon className="h-5 w-5 text-amber-400 fill-amber-300 -rotate-12 drop-shadow-[0_0_4px_rgba(251,191,36,0.3)]" strokeWidth={2.2} />}
                               {theme === 'system' && <Laptop className="h-5 w-5 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]" strokeWidth={2.2} />}
-                              {theme === 'custom' && <Sparkles className="h-5 w-5 text-white fill-white/15 animate-pulse" strokeWidth={2.2} />}
                             </div>
                             <span className="text-xs font-medium">{theme}</span>
                           </div>
                         </button>
                       ))}
                     </div>
-
-                    {/* Custom Theme Builder */}
-                    {showCustomThemeBuilder && (
-                      <div className="border-2 border-primary/30 rounded-lg p-4 bg-primary/5 space-y-4 animate-slideUp">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-semibold flex items-center gap-2">
-                            <Sparkles className="h-4 w-4" />
-                            Custom Theme Builder
-                          </h4>
-                          <button
-                            onClick={() => setShowCustomThemeBuilder(false)}
-                            className="text-muted-foreground hover:text-foreground"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-sm font-medium block mb-2">Primary Color</label>
-                            <input
-                              type="color"
-                              value={`hsl(${customColors.primary})`}
-                              onChange={(e) => {
-                                const color = e.target.value;
-                                setCustomColors(prev => ({ ...prev, primary: color }));
-                              }}
-                              className="w-full h-12 rounded-lg cursor-pointer border-2 border-border"
-                            />
-                            <Input
-                              value={customColors.primary}
-                              onChange={(e) => setCustomColors(prev => ({ ...prev, primary: e.target.value }))}
-                              placeholder="217.2 91.2% 59.8%"
-                              className="mt-2 text-xs"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-sm font-medium block mb-2">Background Color</label>
-                            <input
-                              type="color"
-                              value={`hsl(${customColors.background})`}
-                              onChange={(e) => {
-                                const color = e.target.value;
-                                setCustomColors(prev => ({ ...prev, background: color }));
-                              }}
-                              className="w-full h-12 rounded-lg cursor-pointer border-2 border-border"
-                            />
-                            <Input
-                              value={customColors.background}
-                              onChange={(e) => setCustomColors(prev => ({ ...prev, background: e.target.value }))}
-                              placeholder="0 0% 100%"
-                              className="mt-2 text-xs"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-sm font-medium block mb-2">Foreground Color</label>
-                            <input
-                              type="color"
-                              value={`hsl(${customColors.foreground})`}
-                              onChange={(e) => {
-                                const color = e.target.value;
-                                setCustomColors(prev => ({ ...prev, foreground: color }));
-                              }}
-                              className="w-full h-12 rounded-lg cursor-pointer border-2 border-border"
-                            />
-                            <Input
-                              value={customColors.foreground}
-                              onChange={(e) => setCustomColors(prev => ({ ...prev, foreground: e.target.value }))}
-                              placeholder="240 10% 3.9%"
-                              className="mt-2 text-xs"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-sm font-medium block mb-2">Accent Color</label>
-                            <input
-                              type="color"
-                              value={`hsl(${customColors.accent})`}
-                              onChange={(e) => {
-                                const color = e.target.value;
-                                setCustomColors(prev => ({ ...prev, accent: color }));
-                              }}
-                              className="w-full h-12 rounded-lg cursor-pointer border-2 border-border"
-                            />
-                            <Input
-                              value={customColors.accent}
-                              onChange={(e) => setCustomColors(prev => ({ ...prev, accent: e.target.value }))}
-                              placeholder="240 4.8% 95.9%"
-                              className="mt-2 text-xs"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex gap-2 pt-2">
-                          <Button onClick={handleSaveCustomTheme} className="flex-1">
-                            Apply Custom Theme
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            onClick={() => {
-                              setCustomColors({
-                                primary: '217.2 91.2% 59.8%',
-                                background: '0 0% 100%',
-                                foreground: '240 10% 3.9%',
-                                accent: '240 4.8% 95.9%',
-                              });
-                            }}
-                          >
-                            Reset
-                          </Button>
-                        </div>
-
-                        <p className="text-xs text-muted-foreground">
-                          💡 Tip: Use HSL format (Hue Saturation Lightness) for best results. Example: "217.2 91.2% 59.8%"
-                        </p>
-                      </div>
-                    )}
                   </div>
 
                   {/* Font Size */}
