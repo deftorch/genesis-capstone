@@ -862,7 +862,7 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
               ) : ui.p5Code && ui.activeRenderer === 'mermaid' ? (
                 <MermaidCanvas key={`mermaid-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code ? (
-                <P5Canvas key={`p5-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
+                <P5Canvas key={`p5-${refreshKey}`} code={ui.p5Code} engineData={ui.engineData} width={400} height={400} />
               ) : (
                 <div className="bg-gray-200 h-full flex items-center justify-center rounded-lg w-full">
                   <div className="text-center text-gray-500">

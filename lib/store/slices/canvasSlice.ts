@@ -1,5 +1,5 @@
 import { StateCreator } from 'zustand';
-import { RendererType } from '@/types';
+import { RendererType, GameEngineData } from '@/types';
 import { UIState } from '../ui-store';
 
 export interface CanvasSlice {
@@ -7,6 +7,7 @@ export interface CanvasSlice {
   isArtifactFullscreen: boolean;
   artifactMode: 'standard' | 'wide';
   p5Code: string;
+  engineData: GameEngineData | null;
   editableCode: string;
   activeRenderer: RendererType;
   activeTab: 'preview' | 'code' | 'diff';
@@ -24,6 +25,7 @@ export interface CanvasSlice {
   setIsArtifactFullscreen: (fs: boolean) => void;
   setArtifactMode: (mode: CanvasSlice['artifactMode']) => void;
   setP5Code: (code: string) => void;
+  setEngineData: (data: GameEngineData | null) => void;
   setEditableCode: (code: string) => void;
   setActiveRenderer: (renderer: RendererType) => void;
   setActiveTab: (tab: CanvasSlice['activeTab']) => void;
@@ -41,6 +43,7 @@ export const createCanvasSlice: StateCreator<UIState, [], [], CanvasSlice> = (se
   isArtifactFullscreen: false,
   artifactMode: 'standard',
   p5Code: '',
+  engineData: null,
   editableCode: '',
   activeRenderer: 'p5',
   activeTab: 'preview',
@@ -58,6 +61,7 @@ export const createCanvasSlice: StateCreator<UIState, [], [], CanvasSlice> = (se
   setIsArtifactFullscreen: (fs) => set({ isArtifactFullscreen: fs, artifactMode: fs ? 'wide' : 'standard' }),
   setArtifactMode: (mode) => set({ artifactMode: mode, isArtifactFullscreen: mode === 'wide' }),
   setP5Code: (code) => set({ p5Code: code }),
+  setEngineData: (data) => set({ engineData: data }),
   setEditableCode: (code) => set({ editableCode: code }),
   setActiveRenderer: (renderer) => set({ activeRenderer: renderer }),
   setActiveTab: (tab) => set({ activeTab: tab }),
