@@ -2,18 +2,16 @@
 
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useSettingsStore } from '@/lib/store/settings-store';
-import { GameEngineData } from '@/types';
 
 interface P5CanvasProps {
   code: string;
-  engineData?: GameEngineData | null;
   width?: number;
   height?: number;
   onError?: (error: Error) => void;
   onDownload?: () => void;
 }
 
-const P5Canvas: React.FC<P5CanvasProps> = ({ code, engineData, width = 400, height = 400, onError }) => {
+const P5Canvas: React.FC<P5CanvasProps> = ({ code, width = 400, height = 400, onError }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { preferences } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
@@ -147,17 +145,6 @@ const P5Canvas: React.FC<P5CanvasProps> = ({ code, engineData, width = 400, heig
         if (typeof window.noLoop === 'function') window.noLoop();
       } else if (event.data === 'playCanvas') {
         if (typeof window.loop === 'function') window.loop();
-      } else if (event.data && event.data.type === 'updateComponent') {
-        // [Fase 3] Hot-Reloading Component
-        try {
-          // Mengeksekusi kode komponen baru yang dikirim via postMessage
-          // Catatan: AI harus mengirim class dalam format "window.ClassName = class { ... }" 
-          // agar tidak terkena error "Identifier has already been declared".
-          eval(event.data.code);
-          console.log("[Genesis Engine] Component hot-reloaded successfully:", event.data.name);
-        } catch(e) {
-          console.error("[Genesis Engine] Failed to hot-reload component:", e);
-        }
       }
     });
 
@@ -170,67 +157,7 @@ const P5Canvas: React.FC<P5CanvasProps> = ({ code, engineData, width = 400, heig
   <\/script>
 </body>
 </html>`;
-  }, [isDark]); // Menghapus `code` dari dependencies agar iframe tidak ter-reset otomatis
-
-  // Initial code injection & Smart Diffing untuk Hot-Reloading
-  const previousEngineDataRef = useRef<GameEngineData | null>(null);
-
-  useEffect(() => {
-    if (!iframeRef.current?.contentWindow) return;
-    
-    // Jika tidak ada engineData, lakukan injeksi kode full (untuk backward compatibility)
-    if (!engineData) {
-      iframeRef.current.contentWindow.postMessage({ type: 'updateComponent', code: code }, '*');
-      return;
-    }
-
-    // Jika ini pertama kali dimuat, injeksi semua logic utama
-    if (!previousEngineDataRef.current) {
-      iframeRef.current.contentWindow.postMessage({ type: 'updateComponent', code: code }, '*');
-    } else {
-      // Smart Diffing: Bandingkan state lama dan baru, hanya injeksi yang berubah (Hot-Reloading)
-      const oldData = previousEngineDataRef.current;
-      
-      // Cek perubahan Prefabs
-      if (engineData.prefabs) {
-        Object.keys(engineData.prefabs).forEach(prefabName => {
-          const newPrefabCode = engineData.prefabs![prefabName];
-          if (oldData.prefabs?.[prefabName] !== newPrefabCode) {
-            iframeRef.current!.contentWindow!.postMessage({ 
-              type: 'updateComponent', 
-              name: prefabName, 
-              code: newPrefabCode 
-            }, '*');
-          }
-        });
-      }
-
-      // Cek perubahan Scenes
-      if (engineData.scenes) {
-        Object.keys(engineData.scenes).forEach(sceneName => {
-          const newSceneCode = engineData.scenes![sceneName];
-          if (oldData.scenes?.[sceneName] !== newSceneCode) {
-            iframeRef.current!.contentWindow!.postMessage({ 
-              type: 'updateComponent', 
-              name: sceneName, 
-              code: newSceneCode 
-            }, '*');
-          }
-        });
-      }
-
-      // Cek perubahan Main Logic
-      if (engineData.mainLogic && oldData.mainLogic !== engineData.mainLogic) {
-        iframeRef.current.contentWindow.postMessage({ 
-          type: 'updateComponent', 
-          name: 'mainLogic', 
-          code: engineData.mainLogic 
-        }, '*');
-      }
-    }
-
-    previousEngineDataRef.current = engineData;
-  }, [code, engineData]);
+  }, [code, isDark]);
 
   // Function to trigger download
   const downloadImage = () => {

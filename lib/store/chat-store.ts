@@ -39,7 +39,6 @@ interface ChatStore {
   searchChats: (query: string) => Chat[];
   
   addArtifact: (artifact: Omit<Artifact, 'id' | 'createdAt'>) => void;
-  updateArtifact: (artifactId: string, updates: Partial<Artifact>) => void;
   deleteArtifact: (artifactId: string) => void;
   deleteArtifactsForChat: (chatId: string) => void;
   
@@ -412,14 +411,6 @@ export const useChatStore = create<ChatStore>()(
         };
         set((state: ChatStore) => ({
           artifacts: [newArtifact, ...state.artifacts],
-        }));
-      },
-
-      updateArtifact: (artifactId: string, updates: Partial<Artifact>) => {
-        set((state: ChatStore) => ({
-          artifacts: state.artifacts.map((a: Artifact) => 
-            a.id === artifactId ? { ...a, ...updates } : a
-          ),
         }));
       },
 

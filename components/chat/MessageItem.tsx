@@ -15,7 +15,6 @@ import {
 import { useUIStore } from '@/lib/store/ui-store';
 import { formatMessageTimestamp } from '@/lib/utils';
 import { RendererType } from '@/types';
-import { assembleGame } from '@/lib/extract-code';
 
 const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false });
 const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
@@ -78,52 +77,26 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   }, [previewNode]);
 
   const renderAiMessage = (content: string, messageIndex: number) => {
-    let textBefore = '';
-    let code = '';
-    let rType: RendererType = 'p5';
-    let isCodeBlock = false;
-    let engineData = null;
+    const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\n([\s\S]*?)```/g;
+    const match = codeRegex.exec(content);
 
-    // 1. Try to parse as JSON (New Engine-Driven Architecture)
-    try {
-      const parsed = JSON.parse(content);
-      if (parsed.renderer && (parsed.code !== undefined || parsed.engineData)) {
-        isCodeBlock = true;
-        textBefore = parsed.explanation || '';
-        rType = parsed.renderer as RendererType;
-        engineData = parsed.engineData;
-        
-        if (rType === 'p5' && parsed.engineData) {
-          code = assembleGame(parsed.engineData);
-        } else {
-          code = parsed.code || '';
-        }
+    if (match) {
+      const textBefore = content.substring(0, match.index);
+      const code = match[1];
+
+      let rType: RendererType = 'p5';
+      if (code.includes('// renderer: d3')) {
+        rType = 'd3';
+      } else if (code.includes('// renderer: svg') || code.includes('<svg')) {
+        rType = 'svg';
+      } else if (
+        code.includes('// renderer: mermaid') ||
+        code.includes('graph ') ||
+        code.includes('flowchart ')
+      ) {
+        rType = 'mermaid';
       }
-    } catch (e) {
-      // 2. Fallback to Markdown regex for legacy chats
-      const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\n([\s\S]*?)```/g;
-      const match = codeRegex.exec(content);
 
-      if (match) {
-        isCodeBlock = true;
-        textBefore = content.substring(0, match.index);
-        code = match[1];
-
-        if (code.includes('// renderer: d3')) {
-          rType = 'd3';
-        } else if (code.includes('// renderer: svg') || code.includes('<svg')) {
-          rType = 'svg';
-        } else if (
-          code.includes('// renderer: mermaid') ||
-          code.includes('graph ') ||
-          code.includes('flowchart ')
-        ) {
-          rType = 'mermaid';
-        }
-      }
-    }
-
-    if (isCodeBlock) {
       const verObj = codeVersions.find((v) => v.messageIndex === messageIndex);
 
       return (
@@ -161,7 +134,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               } else {
                 ui.setP5Code(code);
                 ui.setEditableCode(code);
-                ui.setEngineData(engineData);
                 ui.setActiveRenderer(rType);
               }
               ui.setActiveTab('preview');
@@ -189,7 +161,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 {rType === 'd3' && <D3Canvas code={code} />}
                 {rType === 'svg' && <SVGCanvas code={code} />}
                 {rType === 'mermaid' && <MermaidCanvas code={code} />}
-                {rType === 'p5' && <P5Canvas code={code} engineData={engineData} />}
+                {rType === 'p5' && <P5Canvas code={code} />}
               </div>
             </div>
           </div>

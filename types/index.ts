@@ -149,13 +149,6 @@ export interface ExportOptions {
 // Renderer and Artifact Types
 export type RendererType = 'p5' | 'd3' | 'svg' | 'mermaid';
 
-export interface GameEngineData {
-  settings?: Record<string, any>;
-  prefabs?: Record<string, string>;
-  scenes?: Record<string, string>;
-  mainLogic?: string;
-}
-
 export interface Artifact {
   id: string;
   chatId: string;
@@ -163,5 +156,4 @@ export interface Artifact {
   code: string;
   renderer: RendererType;
   createdAt: Date;
-  engineData?: GameEngineData;
 }
