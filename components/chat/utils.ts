@@ -14,7 +14,6 @@ import {
   Wand2,
   Gamepad2,
   Zap,
-  Film,
 } from 'lucide-react';
 import { RendererType } from '@/types';
 
