@@ -84,6 +84,7 @@ CRITICAL CODE FORMAT RULES:
 - For Mo.js code: Start with the comment "// renderer: mojs" on the FIRST LINE inside the code block
 - For PixiJS code: Start with the comment "// renderer: pixi" on the FIRST LINE inside the code block
 - For GSAP code: Start with the comment "// renderer: gsap" on the FIRST LINE inside the code block
+- For Anime.js code: Start with the comment "// renderer: anime" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -142,6 +143,13 @@ Mo.js RULES:
 - Create elements dynamically using JavaScript (e.g. \`const box = document.createElement('div'); box.className = 'box';\`) and append them to \`document.getElementById('gsap-container')\`.
 - Remember to apply absolute positioning or appropriate CSS to elements via JavaScript \`style\` properties before animating them.
 - Use gsap.to(), gsap.from(), gsap.timeline(), etc.
+
+**ANIME.JS RULES & CAPABILITIES:**
+- Anime.js is available via the global anime object (v3.2.1)
+- You can animate standard HTML elements or SVG elements.
+- Create elements dynamically using JavaScript and append them to \`document.getElementById('anime-container')\`.
+- Remember to apply styling before animating.
+- Use anime({ ... }), anime.timeline({ ... }), etc.
 - Remember to call .play() on your shapes or bursts to start the animation!
 
 GENERAL RULES:
@@ -159,7 +167,8 @@ GENERAL RULES:
       const isMoJs = trimmedCode.startsWith('// renderer: mojs');
       const isPixi = trimmedCode.startsWith('// renderer: pixi');
       const isGsap = trimmedCode.startsWith('// renderer: gsap');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : 'p5.js';
+      const isAnime = trimmedCode.startsWith('// renderer: anime');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
@@ -282,6 +291,29 @@ box.style.borderRadius = '10px';
 container.appendChild(box);
 
 gsap.to(box, { rotation: 360, x: 100, duration: 2, ease: 'bounce.out' });
+\`\`\`
+
+Example Anime.js code format:
+\`\`\`javascript
+// renderer: anime
+const container = document.getElementById('anime-container');
+const box = document.createElement('div');
+box.style.width = '100px';
+box.style.height = '100px';
+box.style.backgroundColor = '#8338EC';
+box.style.borderRadius = '50%';
+container.appendChild(box);
+
+anime({
+  targets: box,
+  translateX: 250,
+  scale: 2,
+  rotate: '1turn',
+  duration: 2000,
+  loop: true,
+  direction: 'alternate',
+  easing: 'easeInOutSine'
+});
 \`\`\`
 `;
     }

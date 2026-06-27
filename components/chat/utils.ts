@@ -14,6 +14,7 @@ import {
   Wand2,
   Gamepad2,
   Zap,
+  Film,
 } from 'lucide-react';
 import { RendererType } from '@/types';
 
@@ -146,6 +147,14 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
       name: 'GSAP Animation',
       icon: Zap,
       colorClass: 'bg-lime-100 text-lime-700 dark:bg-lime-500/10 dark:text-lime-400',
+    };
+  }
+
+  if (r === 'anime') {
+    return {
+      name: 'Anime.js',
+      icon: Film,
+      colorClass: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400',
     };
   }
 

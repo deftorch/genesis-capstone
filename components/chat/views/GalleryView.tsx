@@ -15,6 +15,7 @@ const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: f
 const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
 const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
 const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: false });
+const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
 
 import { useChatNavigation } from '@/hooks/useChatNavigation';
 import { useArtifactManager } from '@/hooks/useArtifactManager';
@@ -85,6 +86,8 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                       <PixiCanvas code={artifact.code} width={300} height={300} />
                     ) : (artifact.renderer || 'p5') === 'gsap' ? (
                       <GsapCanvas code={artifact.code} width={300} height={300} />
+                    ) : (artifact.renderer || 'p5') === 'anime' ? (
+                      <AnimeCanvas code={artifact.code} width={300} height={300} />
                     ) : (
                       <P5Canvas code={artifact.code} width={300} height={300} />
                     )}
