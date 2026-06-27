@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useUIStore } from '@/lib/store/ui-store';
-import { extractCode } from '@/lib/extract-code';
+import { extractAllCodes } from '@/lib/extract-code';
 import { parseSSEStream } from '@/lib/sse-parser';
 import { ImageAttachment } from '@/types';
 
@@ -172,21 +172,24 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
       }
 
       // Once done, extract code
-      const extracted = extractCode(aiContent);
-      if (extracted) {
+      const allExtracted = extractAllCodes(aiContent);
+      if (allExtracted.length > 0) {
+        const firstExtracted = allExtracted[0];
         if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
-        ui.setP5Code(extracted.code);
-        ui.setEditableCode(extracted.code);
-        ui.setActiveRenderer(extracted.renderer);
+        ui.setP5Code(firstExtracted.code);
+        ui.setEditableCode(firstExtracted.code);
+        ui.setActiveRenderer(firstExtracted.renderer);
         ui.setActiveTab('preview');
         // ui.setShowArtifact(true); // User requested not to auto-open
 
         const chat = chatStore.chats.find((c) => c.id === currentChatId);
-        chatStore.addArtifact({
-          chatId: currentChatId!,
-          chatTitle: chat?.title || 'Untitled',
-          code: extracted.code,
-          renderer: extracted.renderer,
+        allExtracted.forEach((ext) => {
+          chatStore.addArtifact({
+            chatId: currentChatId!,
+            chatTitle: chat?.title || 'Untitled',
+            code: ext.code,
+            renderer: ext.renderer,
+          });
         });
       }
     } catch (err: any) {
@@ -304,19 +307,23 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
         chatStore.updateMessageTokens(chatId, assistantMessageId, finalUsageMetadata.candidatesTokenCount ?? 0);
       }
 
-      const extracted = extractCode(aiContent);
-      if (extracted) {
+      const allExtracted = extractAllCodes(aiContent);
+      if (allExtracted.length > 0) {
+        const firstExtracted = allExtracted[0];
         if (ui.p5Code) ui.setPreviousCode(ui.p5Code);
-        ui.setP5Code(extracted.code);
-        ui.setEditableCode(extracted.code);
-        ui.setActiveRenderer(extracted.renderer);
+        ui.setP5Code(firstExtracted.code);
+        ui.setEditableCode(firstExtracted.code);
+        ui.setActiveRenderer(firstExtracted.renderer);
         ui.setActiveTab('preview');
         // ui.setShowArtifact(true); // User requested not to auto-open
-        chatStore.addArtifact({
-          chatId: chatId,
-          chatTitle: updatedChat.title || 'Untitled',
-          code: extracted.code,
-          renderer: extracted.renderer,
+        
+        allExtracted.forEach((ext) => {
+          chatStore.addArtifact({
+            chatId: chatId,
+            chatTitle: updatedChat.title || 'Untitled',
+            code: ext.code,
+            renderer: ext.renderer,
+          });
         });
       }
     } catch (err: any) {

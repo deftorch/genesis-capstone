@@ -62,3 +62,42 @@ export const extractCode = (content: string): { code: string; renderer: Renderer
   // Default to p5 if no specific renderer is detected, or if p5 is explicitly specified
   return { code, renderer: 'p5' };
 };
+
+export const extractAllCodes = (content: string): Array<{ code: string; renderer: RendererType }> => {
+  const codeBlockRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\s*\n([\s\S]*?)(?:```|$)/gi;
+  const results: Array<{ code: string; renderer: RendererType }> = [];
+  
+  let match;
+  while ((match = codeBlockRegex.exec(content)) !== null) {
+    const code = match[1].trim();
+    if (!code) continue;
+
+    const d3Regex = /\/\/\s*renderer\s*:\s*d3/i;
+    const svgRegex = /\/\/\s*renderer\s*:\s*svg/i;
+    const mermaidRegex = /\/\/\s*renderer\s*:\s*mermaid/i;
+    const twojsRegex = /\/\/\s*renderer\s*:\s*twojs/i;
+    const mojsRegex = /\/\/\s*renderer\s*:\s*mojs/i;
+    const pixiRegex = /\/\/\s*renderer\s*:\s*pixi/i;
+    const gsapRegex = /\/\/\s*renderer\s*:\s*gsap/i;
+    const animeRegex = /\/\/\s*renderer\s*:\s*anime/i;
+    const lottieRegex = /\/\/\s*renderer\s*:\s*lottie/i;
+    const matterRegex = /\/\/\s*renderer\s*:\s*matter/i;
+
+    let renderer: RendererType = 'p5';
+    if (d3Regex.test(code)) renderer = 'd3';
+    else if (svgRegex.test(code)) renderer = 'svg';
+    else if (mermaidRegex.test(code)) renderer = 'mermaid';
+    else if (twojsRegex.test(code)) renderer = 'twojs';
+    else if (mojsRegex.test(code)) renderer = 'mojs';
+    else if (pixiRegex.test(code)) renderer = 'pixi';
+    else if (gsapRegex.test(code)) renderer = 'gsap';
+    else if (animeRegex.test(code)) renderer = 'anime';
+    else if (lottieRegex.test(code)) renderer = 'lottie';
+    else if (matterRegex.test(code)) renderer = 'matter';
+
+    results.push({ code, renderer });
+  }
+
+  return results;
+};
+

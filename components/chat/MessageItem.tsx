@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import dynamic from 'next/dynamic';
 import {
   ChevronLeft,
@@ -47,6 +48,20 @@ interface MessageItemProps {
   codeVersions: any[];
 }
 
+const markdownComponents: any = {
+  p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
+  strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-white" {...props} />,
+  em: ({ ...props }) => <em className="italic" {...props} />,
+  ul: ({ ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-left" {...props} />,
+  ol: ({ ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1 text-left" {...props} />,
+  li: ({ ...props }) => <li className="text-sm" {...props} />,
+  code: ({ ...props }) => <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded text-xs font-mono" {...props} />,
+  table: ({ ...props }) => <div className="overflow-x-auto mb-4 w-full"><table className="w-full text-sm text-left text-gray-700 dark:text-gray-300 border-collapse border border-gray-200 dark:border-white/10 rounded-lg overflow-hidden" {...props} /></div>,
+  thead: ({ ...props }) => <thead className="bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white uppercase text-xs" {...props} />,
+  th: ({ ...props }) => <th className="px-4 py-3 border border-gray-200 dark:border-white/10 font-bold whitespace-nowrap" {...props} />,
+  td: ({ ...props }) => <td className="px-4 py-2 border border-gray-200 dark:border-white/10" {...props} />,
+};
+
 export const MessageItem: React.FC<MessageItemProps> = ({
   msg,
   index,
@@ -85,12 +100,24 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
   const renderAiMessage = (content: string, messageIndex: number) => {
     const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\n([\s\S]*?)```/g;
-    const match = codeRegex.exec(content);
+    const elements: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+    let blockCount = 0;
 
-    if (match) {
-      const textBefore = content.substring(0, match.index);
+    while ((match = codeRegex.exec(content)) !== null) {
+      const textBefore = content.substring(lastIndex, match.index);
+      if (textBefore.trim()) {
+        elements.push(
+          <div key={`text-${lastIndex}`} className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-left mb-3">
+            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+              {textBefore}
+            </ReactMarkdown>
+          </div>
+        );
+      }
+
       const code = match[1];
-
       let rType: RendererType = 'p5';
       if (code.includes('// renderer: d3')) {
         rType = 'd3';
@@ -120,98 +147,87 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
       const verObj = codeVersions.find((v) => v.messageIndex === messageIndex);
 
+      elements.push(
+        <div
+          key={`canvas-${match.index}`}
+          onClick={() => {
+            ui.setShowArtifact(true);
+            if (verObj && blockCount === 0) { // For simplicity, only use verObj for the first block
+              ui.setActiveVersionNumber(verObj.versionNumber);
+            } else {
+              ui.setP5Code(code);
+              ui.setEditableCode(code);
+              ui.setActiveRenderer(rType);
+            }
+            ui.setActiveTab('preview');
+          }}
+          className={`border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#090514]/45 overflow-hidden text-gray-200 font-mono text-[12px] cursor-pointer hover:border-[#60aaff]/35 transition-all shadow-md group/card relative mb-3 ${
+            !ui.showArtifact ? 'w-full' : 'max-w-full'
+          }`}
+        >
+          <div 
+            ref={blockCount === 0 ? setPreviewNode : undefined}
+            className={`p-0 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center relative select-none preview-in-chat pointer-events-none aspect-[8/5] ${
+              !ui.showArtifact 
+                ? 'w-full' 
+                : 'w-[280px] sm:w-[368px] max-w-full'
+            }`}
+          >
+            <div 
+              className="absolute left-0 top-0 origin-top-left"
+              style={{ 
+                width: '800px', 
+                height: '500px',
+                transform: `scale(${previewWidth / 800})`
+              }}
+            >
+              {rType === 'd3' && <D3Canvas code={code} />}
+              {rType === 'svg' && <SVGCanvas code={code} />}
+              {rType === 'mermaid' && <MermaidCanvas code={code} />}
+              {rType === 'twojs' && <TwoCanvas code={code} />}
+              {rType === 'mojs' && <MoJsCanvas code={code} />}
+              {rType === 'pixi' && <PixiCanvas code={code} />}
+              {rType === 'gsap' && <GsapCanvas code={code} />}
+              {rType === 'anime' && <AnimeCanvas code={code} />}
+              {rType === 'lottie' && <LottieCanvas code={code} />}
+              {rType === 'matter' && <MatterCanvas code={code} />}
+              {rType === 'p5' && <P5Canvas code={code} />}
+            </div>
+          </div>
+        </div>
+      );
+
+      lastIndex = match.index + match[0].length;
+      blockCount++;
+    }
+
+    const textAfter = content.substring(lastIndex);
+    if (textAfter.trim()) {
+      elements.push(
+        <div key={`text-${lastIndex}`} className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-left">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+            {textAfter}
+          </ReactMarkdown>
+        </div>
+      );
+    }
+
+    if (elements.length > 0) {
       return (
-        <div className="flex flex-col gap-2.5">
+        <div className="flex flex-col">
           <style>{`
             .preview-in-chat button {
               display: none !important;
             }
           `}</style>
-          {textBefore && (
-            <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-left mb-3">
-              <ReactMarkdown
-                components={{
-                  p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
-                  strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-white" {...props} />,
-                  em: ({ ...props }) => <em className="italic" {...props} />,
-                  ul: ({ ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-left" {...props} />,
-                  ol: ({ ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1 text-left" {...props} />,
-                  li: ({ ...props }) => <li className="text-sm" {...props} />,
-                  code: ({ ...props }) => (
-                    <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded text-xs font-mono" {...props} />
-                  ),
-                }}
-              >
-                {textBefore}
-              </ReactMarkdown>
-            </div>
-          )}
-
-          <div
-            onClick={() => {
-              ui.setShowArtifact(true);
-              if (verObj) {
-                ui.setActiveVersionNumber(verObj.versionNumber);
-              } else {
-                ui.setP5Code(code);
-                ui.setEditableCode(code);
-                ui.setActiveRenderer(rType);
-              }
-              ui.setActiveTab('preview');
-            }}
-            className={`border border-gray-200 dark:border-white/10 rounded-xl bg-white dark:bg-[#090514]/45 overflow-hidden text-gray-200 font-mono text-[12px] cursor-pointer hover:border-[#60aaff]/35 transition-all shadow-md group/card relative ${
-              !ui.showArtifact ? 'w-full' : 'max-w-full'
-            }`}
-          >
-            <div 
-              ref={setPreviewNode}
-              className={`p-0 bg-white dark:bg-[#07030e]/30 rounded-xl overflow-hidden flex items-center justify-center relative select-none preview-in-chat pointer-events-none aspect-[8/5] ${
-                !ui.showArtifact 
-                  ? 'w-full' 
-                  : 'w-[280px] sm:w-[368px] max-w-full'
-              }`}
-            >
-              <div 
-                className="absolute left-0 top-0 origin-top-left"
-                style={{ 
-                  width: '800px', 
-                  height: '500px',
-                  transform: `scale(${previewWidth / 800})`
-                }}
-              >
-                {rType === 'd3' && <D3Canvas code={code} />}
-                {rType === 'svg' && <SVGCanvas code={code} />}
-                {rType === 'mermaid' && <MermaidCanvas code={code} />}
-                {rType === 'twojs' && <TwoCanvas code={code} />}
-                {rType === 'mojs' && <MoJsCanvas code={code} />}
-                {rType === 'pixi' && <PixiCanvas code={code} />}
-                {rType === 'gsap' && <GsapCanvas code={code} />}
-                {rType === 'anime' && <AnimeCanvas code={code} />}
-                {rType === 'lottie' && <LottieCanvas code={code} />}
-                {rType === 'matter' && <MatterCanvas code={code} />}
-                {rType === 'p5' && <P5Canvas code={code} />}
-              </div>
-            </div>
-          </div>
+          {elements}
         </div>
       );
     }
 
     return (
       <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed text-left">
-        <ReactMarkdown
-          components={{
-            p: ({ ...props }) => <p className="mb-2 last:mb-0" {...props} />,
-            strong: ({ ...props }) => <strong className="font-bold text-gray-900 dark:text-white" {...props} />,
-            em: ({ ...props }) => <em className="italic" {...props} />,
-            ul: ({ ...props }) => <ul className="list-disc pl-4 mb-2 space-y-1 text-left" {...props} />,
-            ol: ({ ...props }) => <ol className="list-decimal pl-4 mb-2 space-y-1 text-left" {...props} />,
-            li: ({ ...props }) => <li className="text-sm" {...props} />,
-            code: ({ ...props }) => (
-              <code className="bg-gray-100 dark:bg-white/10 px-1 py-0.5 rounded text-xs font-mono" {...props} />
-            ),
-          }}
-        >
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
           {content}
         </ReactMarkdown>
       </div>
