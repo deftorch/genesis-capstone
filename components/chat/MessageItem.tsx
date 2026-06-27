@@ -102,6 +102,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         rType = 'twojs';
       } else if (code.includes('// renderer: mojs')) {
         rType = 'mojs';
+      } else if (code.includes('// renderer: pixi')) {
+        rType = 'pixi';
       }
 
       const verObj = codeVersions.find((v) => v.messageIndex === messageIndex);
