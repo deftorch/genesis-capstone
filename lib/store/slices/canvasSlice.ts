@@ -52,7 +52,7 @@ export const createCanvasSlice: StateCreator<UIState, [], [], CanvasSlice> = (se
   pan: { x: 0, y: 0 },
   panMode: false,
   isTrueFullscreen: false,
-  isPlaying: true,
+  isPlaying: false,
 
   setShowArtifact: (show) => set({ showArtifact: show }),
   setIsArtifactFullscreen: (fs) => set({ isArtifactFullscreen: fs, artifactMode: fs ? 'wide' : 'standard' }),

@@ -82,6 +82,7 @@ export const extractAllCodes = (content: string): Array<{ code: string; renderer
     const animeRegex = /\/\/\s*renderer\s*:\s*anime/i;
     const lottieRegex = /\/\/\s*renderer\s*:\s*lottie/i;
     const matterRegex = /\/\/\s*renderer\s*:\s*matter/i;
+    const htmlRegex = /\/\/\s*renderer\s*:\s*html/i;
 
     let renderer: RendererType = 'p5';
     if (d3Regex.test(code)) renderer = 'd3';
@@ -94,6 +95,7 @@ export const extractAllCodes = (content: string): Array<{ code: string; renderer
     else if (animeRegex.test(code)) renderer = 'anime';
     else if (lottieRegex.test(code)) renderer = 'lottie';
     else if (matterRegex.test(code)) renderer = 'matter';
+    else if (htmlRegex.test(code) || code.trim().toLowerCase().startsWith('<!doctype html>')) renderer = 'html';
 
     results.push({ code, renderer });
   }

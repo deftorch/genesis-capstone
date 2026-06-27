@@ -28,6 +28,7 @@ const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: 
 const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
 const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
 const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
+const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
 
 interface MessageItemProps {
   msg: any;
@@ -98,6 +99,31 @@ export const MessageItem: React.FC<MessageItemProps> = ({
     return () => observer.disconnect();
   }, [previewNode]);
 
+  // Pause inline canvases after they render their first frame to save CPU
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (previewNode) {
+        // Find all iframes within this message item's DOM tree
+        const container = previewNode.closest('.flex-col') || document;
+        const iframes = container.querySelectorAll('.preview-in-chat iframe');
+        iframes.forEach((iframe: any) => {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.postMessage('pauseCanvas', '*');
+          }
+        });
+      }
+    }, 500);
+    
+    const timeout = setTimeout(() => {
+      clearInterval(timer);
+    }, 2500);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(timeout);
+    };
+  }, [msg.content, previewNode]);
+
   const renderAiMessage = (content: string, messageIndex: number) => {
     const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\n([\s\S]*?)```/g;
     const elements: React.ReactNode[] = [];
@@ -143,6 +169,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         rType = 'lottie';
       } else if (code.includes('// renderer: matter')) {
         rType = 'matter';
+      } else if (code.includes('// renderer: html') || code.trim().toLowerCase().startsWith('<!doctype html>')) {
+        rType = 'html';
       }
 
       const verObj = codeVersions.find((v) => v.messageIndex === messageIndex);
@@ -191,6 +219,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               {rType === 'anime' && <AnimeCanvas code={code} />}
               {rType === 'lottie' && <LottieCanvas code={code} />}
               {rType === 'matter' && <MatterCanvas code={code} />}
+              {rType === 'html' && <HtmlCanvas code={code} />}
               {rType === 'p5' && <P5Canvas code={code} />}
             </div>
           </div>

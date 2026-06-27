@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { ImageIcon, Plus, Play, Trash2 } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat-store';
@@ -18,6 +18,7 @@ const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: 
 const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
 const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
 const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
+const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
 
 import { useChatNavigation } from '@/hooks/useChatNavigation';
 import { useArtifactManager } from '@/hooks/useArtifactManager';
@@ -29,6 +30,26 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
   const { deleteArtifact: onDeleteArtifact } = useArtifactManager();
   const chatStore = useChatStore();
   const { preferences } = useSettingsStore();
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const iframes = document.querySelectorAll('.gallery-canvas-container iframe');
+      iframes.forEach((iframe: any) => {
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage('pauseCanvas', '*');
+        }
+      });
+    }, 500);
+    
+    const timeout = setTimeout(() => {
+      clearInterval(timer);
+    }, 3000);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(timeout);
+    };
+  }, [chatStore.artifacts]);
 
   return (
     <div className="flex-1 overflow-y-auto p-8 bg-transparent">
@@ -73,7 +94,7 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                       display: none !important;
                     }
                   `}</style>
-                  <div className="preview-in-gallery w-full h-full flex items-center justify-center">
+                  <div className="preview-in-gallery gallery-canvas-container w-full h-full flex items-center justify-center">
                     {(artifact.renderer || 'p5') === 'd3' ? (
                       <D3Canvas code={artifact.code} width={300} height={300} />
                     ) : (artifact.renderer || 'p5') === 'svg' ? (
@@ -92,8 +113,10 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                       <AnimeCanvas code={artifact.code} width={300} height={300} />
                     ) : (artifact.renderer || 'p5') === 'lottie' ? (
                       <LottieCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'matter' ? (
+                    ) : artifact.renderer === 'matter' ? (
                       <MatterCanvas code={artifact.code} width={300} height={300} />
+                    ) : artifact.renderer === 'html' ? (
+                      <HtmlCanvas code={artifact.code} width={300} height={300} />
                     ) : (
                       <P5Canvas code={artifact.code} width={300} height={300} />
                     )}

@@ -14,6 +14,7 @@ import {
   Wand2,
   Gamepad2,
   Zap,
+  Globe,
 } from 'lucide-react';
 import { RendererType } from '@/types';
 
@@ -170,6 +171,14 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
       name: 'Matter.js Physics',
       icon: Shapes,
       colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400',
+    };
+  }
+
+  if (r === 'html') {
+    return {
+      name: 'Web / HTML Canvas',
+      icon: Globe,
+      colorClass: 'bg-slate-100 text-slate-700 dark:bg-slate-500/10 dark:text-slate-400',
     };
   }
 
