@@ -12,6 +12,7 @@ const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false 
 const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
 const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
 const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
+const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
 
 import { useChatNavigation } from '@/hooks/useChatNavigation';
 import { useArtifactManager } from '@/hooks/useArtifactManager';
@@ -76,6 +77,8 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                       <MermaidCanvas code={artifact.code} width={300} height={300} />
                     ) : (artifact.renderer || 'p5') === 'twojs' ? (
                       <TwoCanvas code={artifact.code} width={300} height={300} />
+                    ) : (artifact.renderer || 'p5') === 'mojs' ? (
+                      <MoJsCanvas code={artifact.code} width={300} height={300} />
                     ) : (
                       <P5Canvas code={artifact.code} width={300} height={300} />
                     )}
@@ -112,7 +115,7 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                     </h3>
                     {preferences.developerMode ? (
                       <span
-                        className={`text-[10px] px-2 py-0.5 rounded font-medium select-none ${(artifact.renderer || 'p5') === 'd3' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400' : (artifact.renderer || 'p5') === 'svg' ? 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400' : (artifact.renderer || 'p5') === 'mermaid' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : (artifact.renderer || 'p5') === 'twojs' ? 'bg-pink-100 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400'}`}
+                        className={`text-[10px] px-2 py-0.5 rounded font-medium select-none ${(artifact.renderer || 'p5') === 'd3' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400' : (artifact.renderer || 'p5') === 'svg' ? 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400' : (artifact.renderer || 'p5') === 'mermaid' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : (artifact.renderer || 'p5') === 'twojs' ? 'bg-pink-100 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400' : (artifact.renderer || 'p5') === 'mojs' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400'}`}
                       >
                         {(artifact.renderer || 'p5') === 'd3'
                           ? 'D3.js'
@@ -122,7 +125,9 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                               ? 'Mermaid'
                               : (artifact.renderer || 'p5') === 'twojs'
                                 ? 'Two.js'
-                                : 'p5.js'}
+                                : (artifact.renderer || 'p5') === 'mojs'
+                                  ? 'Mo.js'
+                                  : 'p5.js'}
                       </span>
                     ) : (
                       (() => {

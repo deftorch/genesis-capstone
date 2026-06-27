@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     }
 
     // Build system instruction
-    let systemPrompt = `You are Genesis, a creative AI assistant specialized in generating visual content using p5.js, D3.js, SVG, Mermaid.js, and Two.js.
+    let systemPrompt = `You are Genesis, a creative AI assistant specialized in generating visual content using p5.js, D3.js, SVG, Mermaid.js, Two.js, and Mo.js.
 
 RENDERER SELECTION RULES:
 - Use p5.js for: generative art, simple visuals, sketches, interactive canvas, or animations if relevant
@@ -68,6 +68,7 @@ RENDERER SELECTION RULES:
 - Use SVG for: illustrations, logos, icons, badges, diagrams, flowcharts, geometric art, flat design graphics, or any static vector graphic
 - Use Mermaid for: flowcharts, sequence diagrams, gantt charts, state diagrams, entity relationship diagrams, user journeys, and other structured diagrams
 - Use Two.js for: motion graphics, kinetic typography, 2D vector animations, and slick shape morphing
+- Use Mo.js for: motion graphics, explosive particle bursts, dynamic shapes, and slick click-interaction animations
 
 IMPORTANT:
 - Do NOT force animation. Only include animation if it adds value or is explicitly requested.
@@ -80,6 +81,7 @@ CRITICAL CODE FORMAT RULES:
 - For SVG code: Start with the comment "// renderer: svg" on the FIRST LINE inside the code block, followed by the raw SVG markup starting with <svg>
 - For Mermaid code: Start with the comment "// renderer: mermaid" on the FIRST LINE inside the code block, followed by the Mermaid syntax (e.g., graph TD...)
 - For Two.js code: Start with the comment "// renderer: twojs" on the FIRST LINE inside the code block
+- For Mo.js code: Start with the comment "// renderer: mojs" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -120,6 +122,12 @@ Two.js RULES:
 - Add shapes and animations using two.makeCircle, two.makeRectangle, two.bind('update', ...), etc.
 - Always use autostart: true or call two.play() for animations.
 
+Mo.js RULES:
+- Mo.js is available via global mojs object
+- Use mojs.Burst, mojs.Shape, mojs.Timeline, etc.
+- A div container with id "mojs-container" is available for mounting, e.g. parent: '#mojs-container'. If omitted, it defaults to document.body.
+- Remember to call .play() on your shapes or bursts to start the animation!
+
 GENERAL RULES:
 - Add comments to explain the code
 - Focus on delivering visuals that match the user's intent
@@ -132,7 +140,8 @@ GENERAL RULES:
       const isD3 = trimmedCode.startsWith('// renderer: d3');
       const isSVG = trimmedCode.startsWith('// renderer: svg');
       const isTwoJs = trimmedCode.startsWith('// renderer: twojs');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : 'p5.js';
+      const isMoJs = trimmedCode.startsWith('// renderer: mojs');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
@@ -210,6 +219,25 @@ two.bind('update', function(frameCount) {
   circle.scale += (1.5 - circle.scale) * 0.125;
   circle.rotation += 0.05;
 });
+\`\`\`
+
+Example Mo.js code format:
+\`\`\`javascript
+// renderer: mojs
+const burst = new mojs.Burst({
+  parent: '#mojs-container',
+  radius:   { 0: 100 },
+  count:    5,
+  children: {
+    shape:      'circle',
+    radius:     20,
+    fill:       [ 'deeppink', 'cyan', 'yellow' ],
+    strokeWidth: 5,
+    duration:   2000
+  }
+});
+
+burst.play();
 \`\`\`
 `;
     }

@@ -10,6 +10,8 @@ import {
   Film,
   Image as ImageIcon,
   Layout,
+  Sparkles,
+  Wand2,
 } from 'lucide-react';
 import { RendererType } from '@/types';
 
@@ -104,6 +106,21 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
       name: 'Two.js Canvas',
       icon: Shapes,
       colorClass: 'bg-pink-100 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400',
+    };
+  }
+
+  if (r === 'mojs') {
+    if (t.includes('burst') || t.includes('explosion') || t.includes('particle')) {
+      return {
+        name: 'Mo.js Particles',
+        icon: Sparkles,
+        colorClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400',
+      };
+    }
+    return {
+      name: 'Mo.js Motion',
+      icon: Wand2,
+      colorClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400',
     };
   }
 
