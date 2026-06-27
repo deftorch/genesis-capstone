@@ -44,6 +44,7 @@ const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false 
 const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
 const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
 const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
+const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
 const CodeDiff = dynamic(() => import('@/components/p5/CodeDiff'), { ssr: false });
 
 interface ArtifactPanelProps {
@@ -399,6 +400,8 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
         return 'Flowchart Diagram';
       case 'd3':
         return 'Interactive Visualization';
+      case 'twojs':
+        return 'Motion Graphic';
       default:
         return 'Generative Canvas';
     }
@@ -861,6 +864,8 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
                 <SVGCanvas key={`svg-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code && ui.activeRenderer === 'mermaid' ? (
                 <MermaidCanvas key={`mermaid-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
+              ) : ui.p5Code && ui.activeRenderer === 'twojs' ? (
+                <TwoCanvas key={`twojs-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code ? (
                 <P5Canvas key={`p5-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : (

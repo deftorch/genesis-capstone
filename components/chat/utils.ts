@@ -92,6 +92,21 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
     };
   }
 
+  if (r === 'twojs') {
+    if (t.includes('motion') || t.includes('animation') || t.includes('kinetic')) {
+      return {
+        name: 'Motion Graphic',
+        icon: Film,
+        colorClass: 'bg-pink-100 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400',
+      };
+    }
+    return {
+      name: 'Two.js Canvas',
+      icon: Shapes,
+      colorClass: 'bg-pink-100 text-pink-700 dark:bg-pink-500/10 dark:text-pink-400',
+    };
+  }
+
   if (t.includes('game') || t.includes('play') || t.includes('interactive') || c.includes('keypressed') || c.includes('mouseclicked') || c.includes('game')) {
     return {
       name: 'Game',

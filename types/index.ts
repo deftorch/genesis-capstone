@@ -147,7 +147,7 @@ export interface ExportOptions {
 }
 
 // Renderer and Artifact Types
-export type RendererType = 'p5' | 'd3' | 'svg' | 'mermaid';
+export type RendererType = 'p5' | 'd3' | 'svg' | 'mermaid' | 'twojs';
 
 export interface Artifact {
   id: string;

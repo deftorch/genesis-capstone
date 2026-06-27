@@ -20,6 +20,7 @@ const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false 
 const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
 const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
 const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
+const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
 
 interface MessageItemProps {
   msg: any;
@@ -95,6 +96,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         code.includes('flowchart ')
       ) {
         rType = 'mermaid';
+      } else if (code.includes('// renderer: twojs')) {
+        rType = 'twojs';
       }
 
       const verObj = codeVersions.find((v) => v.messageIndex === messageIndex);
@@ -161,6 +164,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 {rType === 'd3' && <D3Canvas code={code} />}
                 {rType === 'svg' && <SVGCanvas code={code} />}
                 {rType === 'mermaid' && <MermaidCanvas code={code} />}
+                {rType === 'twojs' && <TwoCanvas code={code} />}
                 {rType === 'p5' && <P5Canvas code={code} />}
               </div>
             </div>
