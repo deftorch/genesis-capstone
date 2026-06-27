@@ -25,6 +25,7 @@ const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: 
 const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
 const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: false });
 const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
+const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
 
 interface MessageItemProps {
   msg: any;
@@ -110,6 +111,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         rType = 'gsap';
       } else if (code.includes('// renderer: anime')) {
         rType = 'anime';
+      } else if (code.includes('// renderer: lottie')) {
+        rType = 'lottie';
       }
 
       const verObj = codeVersions.find((v) => v.messageIndex === messageIndex);
@@ -181,6 +184,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 {rType === 'pixi' && <PixiCanvas code={code} />}
                 {rType === 'gsap' && <GsapCanvas code={code} />}
                 {rType === 'anime' && <AnimeCanvas code={code} />}
+                {rType === 'lottie' && <LottieCanvas code={code} />}
                 {rType === 'p5' && <P5Canvas code={code} />}
               </div>
             </div>

@@ -157,6 +157,14 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
     };
   }
 
+  if (r === 'lottie') {
+    return {
+      name: 'Lottie Animation',
+      icon: Play,
+      colorClass: 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400',
+    };
+  }
+
   if (t.includes('game') || t.includes('play') || t.includes('interactive') || c.includes('keypressed') || c.includes('mouseclicked') || c.includes('game')) {
     return {
       name: 'Game',

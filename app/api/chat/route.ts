@@ -85,6 +85,7 @@ CRITICAL CODE FORMAT RULES:
 - For PixiJS code: Start with the comment "// renderer: pixi" on the FIRST LINE inside the code block
 - For GSAP code: Start with the comment "// renderer: gsap" on the FIRST LINE inside the code block
 - For Anime.js code: Start with the comment "// renderer: anime" on the FIRST LINE inside the code block
+- For Lottie code: Start with the comment "// renderer: lottie" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -150,6 +151,11 @@ Mo.js RULES:
 - Create elements dynamically using JavaScript and append them to \`document.getElementById('anime-container')\`.
 - Remember to apply styling before animating.
 - Use anime({ ... }), anime.timeline({ ... }), etc.
+
+**LOTTIE RULES & CAPABILITIES:**
+- Lottie-web is available via the global lottie object (v5.12.x).
+- Initialize animations using \`lottie.loadAnimation({ container: document.getElementById('lottie-container'), renderer: 'svg', loop: true, autoplay: true, animationData: YOUR_JSON_OBJECT })\`.
+- Since you cannot fetch external JSON files reliably, you MUST generate the Lottie \`animationData\` JSON object inline within your JavaScript code. Keep the JSON relatively simple (e.g. basic shapes, morphs) to avoid exceeding token limits.
 - Remember to call .play() on your shapes or bursts to start the animation!
 
 GENERAL RULES:
@@ -168,7 +174,8 @@ GENERAL RULES:
       const isPixi = trimmedCode.startsWith('// renderer: pixi');
       const isGsap = trimmedCode.startsWith('// renderer: gsap');
       const isAnime = trimmedCode.startsWith('// renderer: anime');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : 'p5.js';
+      const isLottie = trimmedCode.startsWith('// renderer: lottie');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : isLottie ? 'Lottie' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
@@ -313,6 +320,48 @@ anime({
   loop: true,
   direction: 'alternate',
   easing: 'easeInOutSine'
+});
+\`\`\`
+
+Example Lottie code format:
+\`\`\`javascript
+// renderer: lottie
+const animationData = {
+  "v": "5.5.2",
+  "fr": 60,
+  "ip": 0,
+  "op": 60,
+  "w": 400,
+  "h": 400,
+  "nm": "Bouncing Ball",
+  "layers": [
+    {
+      "ty": 4, "nm": "Shape Layer 1",
+      "ks": {
+        "p": {
+          "a": 1,
+          "k": [
+            { "i": { "x": 0.833, "y": 0.833 }, "o": { "x": 0.167, "y": 0.167 }, "t": 0, "s": [200, 100], "to": [0, 50], "ti": [0, -50] },
+            { "i": { "x": 0.833, "y": 0.833 }, "o": { "x": 0.167, "y": 0.167 }, "t": 30, "s": [200, 300], "to": [0, -50], "ti": [0, 50] },
+            { "t": 60, "s": [200, 100] }
+          ]
+        }
+      },
+      "shapes": [{
+        "ty": "el", "s": { "a": 0, "k": [100, 100] }, "p": { "a": 0, "k": [0, 0] }
+      }, {
+        "ty": "fl", "c": { "a": 0, "k": [0.8, 0.1, 0.4, 1] }
+      }]
+    }
+  ]
+};
+
+lottie.loadAnimation({
+  container: document.getElementById('lottie-container'),
+  renderer: 'svg',
+  loop: true,
+  autoplay: true,
+  animationData: animationData
 });
 \`\`\`
 `;
