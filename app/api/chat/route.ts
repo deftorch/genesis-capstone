@@ -86,6 +86,7 @@ CRITICAL CODE FORMAT RULES:
 - For GSAP code: Start with the comment "// renderer: gsap" on the FIRST LINE inside the code block
 - For Anime.js code: Start with the comment "// renderer: anime" on the FIRST LINE inside the code block
 - For Lottie code: Start with the comment "// renderer: lottie" on the FIRST LINE inside the code block
+- For Matter.js code: Start with the comment "// renderer: matter" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -156,6 +157,12 @@ Mo.js RULES:
 - Lottie-web is available via the global lottie object (v5.12.x).
 - Initialize animations using \`lottie.loadAnimation({ container: document.getElementById('lottie-container'), renderer: 'svg', loop: true, autoplay: true, animationData: YOUR_JSON_OBJECT })\`.
 - Since you cannot fetch external JSON files reliably, you MUST generate the Lottie \`animationData\` JSON object inline within your JavaScript code. Keep the JSON relatively simple (e.g. basic shapes, morphs) to avoid exceeding token limits.
+
+**MATTER.JS RULES & CAPABILITIES:**
+- Matter.js is available via the global Matter object (v0.19.0).
+- Initialize using \`Matter.Engine\`, \`Matter.Render\`, \`Matter.Runner\`, \`Matter.World\`, \`Matter.Bodies\`, etc.
+- Target the render to \`document.getElementById('matter-container')\`.
+- Make sure to set the render bounds appropriately (e.g., width 800, height 600) so it fits in the sandbox container.
 - Remember to call .play() on your shapes or bursts to start the animation!
 
 GENERAL RULES:
@@ -175,7 +182,8 @@ GENERAL RULES:
       const isGsap = trimmedCode.startsWith('// renderer: gsap');
       const isAnime = trimmedCode.startsWith('// renderer: anime');
       const isLottie = trimmedCode.startsWith('// renderer: lottie');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : isLottie ? 'Lottie' : 'p5.js';
+      const isMatter = trimmedCode.startsWith('// renderer: matter');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : isLottie ? 'Lottie' : isMatter ? 'Matter.js' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
@@ -363,6 +371,33 @@ lottie.loadAnimation({
   autoplay: true,
   animationData: animationData
 });
+\`\`\`
+
+Example Matter.js code format:
+\`\`\`javascript
+// renderer: matter
+const Engine = Matter.Engine,
+      Render = Matter.Render,
+      Runner = Matter.Runner,
+      Bodies = Matter.Bodies,
+      Composite = Matter.Composite;
+
+const engine = Engine.create();
+const render = Render.create({
+    element: document.getElementById('matter-container'),
+    engine: engine,
+    options: { width: 800, height: 600, wireframes: false, background: '#0f172a' }
+});
+
+const boxA = Bodies.rectangle(400, 200, 80, 80);
+const boxB = Bodies.rectangle(450, 50, 80, 80);
+const ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+
+Composite.add(engine.world, [boxA, boxB, ground]);
+
+Render.run(render);
+const runner = Runner.create();
+Runner.run(runner, engine);
 \`\`\`
 `;
     }

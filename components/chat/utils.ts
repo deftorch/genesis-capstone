@@ -165,6 +165,14 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
     };
   }
 
+  if (r === 'matter') {
+    return {
+      name: 'Matter.js Physics',
+      icon: Shapes,
+      colorClass: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400',
+    };
+  }
+
   if (t.includes('game') || t.includes('play') || t.includes('interactive') || c.includes('keypressed') || c.includes('mouseclicked') || c.includes('game')) {
     return {
       name: 'Game',

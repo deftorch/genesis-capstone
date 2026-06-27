@@ -50,6 +50,7 @@ const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: 
 const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: false });
 const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
 const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
+const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
 const CodeDiff = dynamic(() => import('@/components/p5/CodeDiff'), { ssr: false });
 
 interface ArtifactPanelProps {
@@ -417,6 +418,8 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
         return 'Anime.js Animation';
       case 'lottie':
         return 'Lottie Animation';
+      case 'matter':
+        return 'Matter.js Physics';
       default:
         return 'Generative Canvas';
     }
@@ -891,6 +894,8 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
                 <AnimeCanvas key={`anime-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code && ui.activeRenderer === 'lottie' ? (
                 <LottieCanvas key={`lottie-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
+              ) : ui.p5Code && ui.activeRenderer === 'matter' ? (
+                <MatterCanvas key={`matter-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code ? (
                 <P5Canvas key={`p5-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : (

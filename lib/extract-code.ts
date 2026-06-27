@@ -26,6 +26,7 @@ export const extractCode = (content: string): { code: string; renderer: Renderer
   const gsapRegex = /\/\/\s*renderer\s*:\s*gsap/i;
   const animeRegex = /\/\/\s*renderer\s*:\s*anime/i;
   const lottieRegex = /\/\/\s*renderer\s*:\s*lottie/i;
+  const matterRegex = /\/\/\s*renderer\s*:\s*matter/i;
 
   if (d3Regex.test(code)) {
     return { code, renderer: 'd3' };
@@ -53,6 +54,9 @@ export const extractCode = (content: string): { code: string; renderer: Renderer
   }
   if (lottieRegex.test(code)) {
     return { code, renderer: 'lottie' };
+  }
+  if (matterRegex.test(code)) {
+    return { code, renderer: 'matter' };
   }
   
   // Default to p5 if no specific renderer is detected, or if p5 is explicitly specified
