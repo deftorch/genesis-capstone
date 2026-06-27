@@ -13,6 +13,7 @@ import {
   Sparkles,
   Wand2,
   Gamepad2,
+  Zap,
 } from 'lucide-react';
 import { RendererType } from '@/types';
 
@@ -137,6 +138,14 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
       name: 'PixiJS Canvas',
       icon: ImageIcon,
       colorClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
+    };
+  }
+
+  if (r === 'gsap') {
+    return {
+      name: 'GSAP Animation',
+      icon: Zap,
+      colorClass: 'bg-lime-100 text-lime-700 dark:bg-lime-500/10 dark:text-lime-400',
     };
   }
 

@@ -83,6 +83,7 @@ CRITICAL CODE FORMAT RULES:
 - For Two.js code: Start with the comment "// renderer: twojs" on the FIRST LINE inside the code block
 - For Mo.js code: Start with the comment "// renderer: mojs" on the FIRST LINE inside the code block
 - For PixiJS code: Start with the comment "// renderer: pixi" on the FIRST LINE inside the code block
+- For GSAP code: Start with the comment "// renderer: gsap" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -134,6 +135,13 @@ Mo.js RULES:
 - Append the canvas via \`document.getElementById('pixi-container').appendChild(app.view)\`
 - Note: you must append \`app.view\` as a DOM node.
 - Use PIXI.Graphics, PIXI.Sprite, PIXI.Container, etc.
+
+**GSAP RULES & CAPABILITIES:**
+- GSAP is available via the global gsap object (v3.12.x)
+- You can animate standard HTML elements or SVG elements.
+- Create elements dynamically using JavaScript (e.g. \`const box = document.createElement('div'); box.className = 'box';\`) and append them to \`document.getElementById('gsap-container')\`.
+- Remember to apply absolute positioning or appropriate CSS to elements via JavaScript \`style\` properties before animating them.
+- Use gsap.to(), gsap.from(), gsap.timeline(), etc.
 - Remember to call .play() on your shapes or bursts to start the animation!
 
 GENERAL RULES:
@@ -150,7 +158,8 @@ GENERAL RULES:
       const isTwoJs = trimmedCode.startsWith('// renderer: twojs');
       const isMoJs = trimmedCode.startsWith('// renderer: mojs');
       const isPixi = trimmedCode.startsWith('// renderer: pixi');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : 'p5.js';
+      const isGsap = trimmedCode.startsWith('// renderer: gsap');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
@@ -259,6 +268,20 @@ graphics.beginFill(0xFF3300);
 graphics.drawRect(50, 50, 100, 100);
 graphics.endFill();
 app.stage.addChild(graphics);
+\`\`\`
+
+Example GSAP code format:
+\`\`\`javascript
+// renderer: gsap
+const container = document.getElementById('gsap-container');
+const box = document.createElement('div');
+box.style.width = '100px';
+box.style.height = '100px';
+box.style.backgroundColor = '#FF006E';
+box.style.borderRadius = '10px';
+container.appendChild(box);
+
+gsap.to(box, { rotation: 360, x: 100, duration: 2, ease: 'bounce.out' });
 \`\`\`
 `;
     }
