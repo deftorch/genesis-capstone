@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script>
+    window.keysBefore = Object.keys(window);
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script>
+</head>
+<body>
+  <div id="result"></div>
+  <script>
+    const keysAfter = Object.keys(window);
+    const newKeys = keysAfter.filter(k => !window.keysBefore.includes(k) && k !== 'keysBefore' && k !== 'keysAfter' && k !== 'newKeys');
+    
+    document.getElementById('result').innerText = "New keys: " + newKeys.join(', ');
+  </script>
+</body>
+</html>

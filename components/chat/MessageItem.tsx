@@ -22,6 +22,7 @@ const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: fal
 const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
 const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
 const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
+const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
 
 interface MessageItemProps {
   msg: any;
@@ -169,6 +170,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 {rType === 'mermaid' && <MermaidCanvas code={code} />}
                 {rType === 'twojs' && <TwoCanvas code={code} />}
                 {rType === 'mojs' && <MoJsCanvas code={code} />}
+                {rType === 'pixi' && <PixiCanvas code={code} />}
                 {rType === 'p5' && <P5Canvas code={code} />}
               </div>
             </div>

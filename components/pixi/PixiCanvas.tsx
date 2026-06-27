@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { useSettingsStore } from '@/lib/store/settings-store';
 
-interface MoJsCanvasProps {
+interface PixiCanvasProps {
   code: string;
   width?: number;
   height?: number;
@@ -11,7 +11,7 @@ interface MoJsCanvasProps {
   onDownload?: () => void;
 }
 
-const MoJsCanvas: React.FC<MoJsCanvasProps> = ({ code, width = 400, height = 400, onError }) => {
+const PixiCanvas: React.FC<PixiCanvasProps> = ({ code, width = 400, height = 400, onError }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { preferences } = useSettingsStore();
   const [mounted, setMounted] = useState(false);
@@ -75,7 +75,7 @@ const MoJsCanvas: React.FC<MoJsCanvasProps> = ({ code, width = 400, height = 400
       z-index: 100;
       position: relative;
     }
-    #mojs-container {
+    #pixi-container {
       width: 100%;
       height: 100%;
       position: absolute;
@@ -85,11 +85,17 @@ const MoJsCanvas: React.FC<MoJsCanvasProps> = ({ code, width = 400, height = 400
       justify-content: center;
       align-items: center;
     }
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
   </style>
 </head>
 <body>
-  <script src="https://cdn.jsdelivr.net/npm/@mojs/core"></script>
-  <div id="mojs-container"></div>
+  <!-- Load Pixi.js inside body to ensure document.body is available if needed -->
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@7.x/dist/pixi.min.js"></script>
+  <div id="pixi-container"></div>
   <script>
     // Error handling
     window.onerror = function(msg, url, lineNo, columnNo, error) {
@@ -100,46 +106,18 @@ const MoJsCanvas: React.FC<MoJsCanvasProps> = ({ code, width = 400, height = 400
     // Listen for download requests from parent
     window.addEventListener('message', function(event) {
       if (event.data === 'downloadCanvas') {
-        // Mo.js generates div and svg elements. Rasterization is tricky without html2canvas.
-        // As a fallback, we grab the first SVG we find.
-        const svg = document.querySelector('svg');
-        if (svg) {
-          const svgData = new XMLSerializer().serializeToString(svg);
-          const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-          const DOMURL = window.URL || window.webkitURL || window;
-          const url = DOMURL.createObjectURL(blob);
-          
-          const img = new Image();
-          img.onload = function () {
-            const offscreenCanvas = document.createElement('canvas');
-            offscreenCanvas.width = svg.clientWidth * 2 || window.innerWidth * 2;
-            offscreenCanvas.height = svg.clientHeight * 2 || window.innerHeight * 2;
-            const ctx = offscreenCanvas.getContext('2d');
-            ctx.scale(2, 2);
-            
-            // Fill background
-            ctx.fillStyle = '${isDark ? '#0b0f19' : '#ffffff'}';
-            ctx.fillRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
-            
-            ctx.drawImage(img, 0, 0);
-            DOMURL.revokeObjectURL(url);
-            
-            const dataURL = offscreenCanvas.toDataURL('image/png');
-            window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
-          };
-          img.onerror = function(e) {
-             window.parent.postMessage({ type: 'canvasData', dataURL: null }, '*');
-          }
-          img.src = url;
+        const canvas = document.querySelector('canvas');
+        if (canvas) {
+          const dataURL = canvas.toDataURL('image/png');
+          window.parent.postMessage({ type: 'canvasData', dataURL: dataURL }, '*');
         } else {
-           window.parent.postMessage({ type: 'canvasData', dataURL: null }, '*');
+          window.parent.postMessage({ type: 'canvasData', dataURL: null }, '*');
         }
       }
     });
 
     try {
-      // User's Mo.js code
-      // We provide a container #mojs-container for them to mount things to if needed.
+      // User's Pixi.js code
       ${code}
     } catch(e) {
       document.body.innerHTML = '<div class="error"><strong>Error:</strong><br>' + e.message + '</div>';
@@ -160,10 +138,10 @@ const MoJsCanvas: React.FC<MoJsCanvasProps> = ({ code, width = 400, height = 400
         srcDoc={htmlContent}
         style={{ width: '100%', height: '100%', border: 'none' }}
         sandbox="allow-scripts allow-downloads"
-        title="Mo.js Artwork Preview"
+        title="PixiJS Preview"
       />
     </div>
   );
 };
 
-export default MoJsCanvas;
+export default PixiCanvas;

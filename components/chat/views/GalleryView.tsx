@@ -13,6 +13,7 @@ const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: fal
 const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
 const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
 const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
+const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
 
 import { useChatNavigation } from '@/hooks/useChatNavigation';
 import { useArtifactManager } from '@/hooks/useArtifactManager';
@@ -79,6 +80,8 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                       <TwoCanvas code={artifact.code} width={300} height={300} />
                     ) : (artifact.renderer || 'p5') === 'mojs' ? (
                       <MoJsCanvas code={artifact.code} width={300} height={300} />
+                    ) : (artifact.renderer || 'p5') === 'pixi' ? (
+                      <PixiCanvas code={artifact.code} width={300} height={300} />
                     ) : (
                       <P5Canvas code={artifact.code} width={300} height={300} />
                     )}

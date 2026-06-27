@@ -22,6 +22,7 @@ export const extractCode = (content: string): { code: string; renderer: Renderer
   const mermaidRegex = /\/\/\s*renderer\s*:\s*mermaid/i;
   const twojsRegex = /\/\/\s*renderer\s*:\s*twojs/i;
   const mojsRegex = /\/\/\s*renderer\s*:\s*mojs/i;
+  const pixiRegex = /\/\/\s*renderer\s*:\s*pixi/i;
 
   if (d3Regex.test(code)) {
     return { code, renderer: 'd3' };
@@ -37,6 +38,9 @@ export const extractCode = (content: string): { code: string; renderer: Renderer
   }
   if (mojsRegex.test(code)) {
     return { code, renderer: 'mojs' };
+  }
+  if (pixiRegex.test(code)) {
+    return { code, renderer: 'pixi' };
   }
   
   // Default to p5 if no specific renderer is detected, or if p5 is explicitly specified

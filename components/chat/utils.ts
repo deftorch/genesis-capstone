@@ -12,6 +12,7 @@ import {
   Layout,
   Sparkles,
   Wand2,
+  Gamepad2,
 } from 'lucide-react';
 import { RendererType } from '@/types';
 
@@ -121,6 +122,21 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
       name: 'Mo.js Motion',
       icon: Wand2,
       colorClass: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400',
+    };
+  }
+
+  if (r === 'pixi') {
+    if (t.includes('game') || t.includes('sprite') || t.includes('play')) {
+      return {
+        name: 'PixiJS Game',
+        icon: Gamepad2,
+        colorClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
+      };
+    }
+    return {
+      name: 'PixiJS Canvas',
+      icon: ImageIcon,
+      colorClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
     };
   }
 

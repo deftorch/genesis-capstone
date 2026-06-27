@@ -82,6 +82,7 @@ CRITICAL CODE FORMAT RULES:
 - For Mermaid code: Start with the comment "// renderer: mermaid" on the FIRST LINE inside the code block, followed by the Mermaid syntax (e.g., graph TD...)
 - For Two.js code: Start with the comment "// renderer: twojs" on the FIRST LINE inside the code block
 - For Mo.js code: Start with the comment "// renderer: mojs" on the FIRST LINE inside the code block
+- For PixiJS code: Start with the comment "// renderer: pixi" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -126,6 +127,13 @@ Mo.js RULES:
 - Mo.js is available via global mojs object
 - Use mojs.Burst, mojs.Shape, mojs.Timeline, etc.
 - A div container with id "mojs-container" is available for mounting, e.g. parent: '#mojs-container'. If omitted, it defaults to document.body.
+
+**PIXIJS (v7) RULES & CAPABILITIES:**
+- PixiJS is available via the global PIXI object (v7.x)
+- Create the app via \`const app = new PIXI.Application({ ... })\`
+- Append the canvas via \`document.getElementById('pixi-container').appendChild(app.view)\`
+- Note: you must append \`app.view\` as a DOM node.
+- Use PIXI.Graphics, PIXI.Sprite, PIXI.Container, etc.
 - Remember to call .play() on your shapes or bursts to start the animation!
 
 GENERAL RULES:
@@ -141,7 +149,8 @@ GENERAL RULES:
       const isSVG = trimmedCode.startsWith('// renderer: svg');
       const isTwoJs = trimmedCode.startsWith('// renderer: twojs');
       const isMoJs = trimmedCode.startsWith('// renderer: mojs');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : 'p5.js';
+      const isPixi = trimmedCode.startsWith('// renderer: pixi');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
@@ -238,6 +247,18 @@ const burst = new mojs.Burst({
 });
 
 burst.play();
+\`\`\`
+
+Example PixiJS code format:
+\`\`\`javascript
+// renderer: pixi
+const app = new PIXI.Application({ width: 400, height: 400, backgroundColor: 0x1099bb });
+document.getElementById('pixi-container').appendChild(app.view);
+const graphics = new PIXI.Graphics();
+graphics.beginFill(0xFF3300);
+graphics.drawRect(50, 50, 100, 100);
+graphics.endFill();
+app.stage.addChild(graphics);
 \`\`\`
 `;
     }
