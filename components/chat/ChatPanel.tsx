@@ -25,7 +25,7 @@ import { useUIStore } from '@/lib/store/ui-store';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useToast } from '@/lib/store/toast-store';
-import { formatDate, formatMessageTimestamp } from '@/lib/utils';
+import { formatDate, formatMessageTimestamp, formatTokenCount } from '@/lib/utils';
 import { AIModel, ImageAttachment, RendererType } from '@/types';
 import { FILE_UPLOAD_CONFIG, AI_MODELS } from '@/config/constants';
 
@@ -158,9 +158,16 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
           )}
 
           {ui.activeChatId && ui.currentView === 'chat' ? (
-            <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 max-w-[180px] sm:max-w-[280px] truncate select-none">
-              {chatStore.chats.find((c) => c.id === ui.activeChatId)?.title || 'New Creation'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 max-w-[180px] sm:max-w-[280px] truncate select-none">
+                {chatStore.chats.find((c) => c.id === ui.activeChatId)?.title || 'New Creation'}
+              </span>
+              {preferences.developerMode && preferences.showTokenCount && (
+                <span className="text-[10px] font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/5 px-2 py-0.5 rounded-full border border-gray-200 dark:border-white/10 select-none">
+                  {formatTokenCount(chatStore.chats.find((c) => c.id === ui.activeChatId)?.totalTokens || 0)} tokens
+                </span>
+              )}
+            </div>
           ) : (
             !ui.sidebarOpen && (
               <span className="text-lg font-semibold text-slate-800 dark:text-white select-none">
