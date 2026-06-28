@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Paperclip, ChevronDown, Send } from 'lucide-react';
+import { Loader2, Paperclip, ChevronDown, Send, Square } from 'lucide-react';
 import { MessageList } from '@/components/chat/MessageList';
 import { ChatImagePreview } from '@/components/chat/ChatImagePreview';
 import { useUIStore } from '@/lib/store/ui-store';
@@ -15,6 +15,7 @@ interface ActiveChatViewProps {
   onRegenerate: (messageId: string) => void;
   onSwitchVersionIdx: (messageId: string, idx: number) => void;
   onSaveMessageEdit: (messageId: string, index: number, text: string) => void;
+  onStopGeneration: () => void;
   codeVersions: any[];
   
   attachedImages: ImageAttachment[];
@@ -38,6 +39,7 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
   onRegenerate,
   onSwitchVersionIdx,
   onSaveMessageEdit,
+  onStopGeneration,
   codeVersions,
   
   attachedImages,
@@ -153,13 +155,24 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
                     </div>
                   )}
                 </div>
+              {isLoading ? (
+                <button
+                  onClick={() => onStopGeneration()}
+                  className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-sm transition-colors cursor-pointer"
+                  title="Stop generating"
+                >
+                  <Square size={15} fill="currentColor" />
+                </button>
+              ) : (
                 <button
                   onClick={() => onSendMessage()}
-                  disabled={isLoading || (!ui.inputMessage.trim() && attachedImages.length === 0)}
+                  disabled={!ui.inputMessage.trim() && attachedImages.length === 0}
                   className="p-2.5 bg-[#1a6adf] dark:bg-white text-white dark:text-black hover:opacity-95 rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                  title="Send message"
                 >
                   <Send size={15} />
                 </button>
+              )}
               </div>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, Loader2, Paperclip, Send, Layout, Film, Image as ImageIcon, Play, Code, BarChart3, Network, PieChart, Shapes, GitFork, Clock } from 'lucide-react';
+import { ChevronDown, Loader2, Paperclip, Send, Square, Layout, Film, Image as ImageIcon, Play, Code, BarChart3, Network, PieChart, Shapes, GitFork, Clock } from 'lucide-react';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useToast } from '@/lib/store/toast-store';
@@ -13,6 +13,7 @@ interface HomeViewProps {
   removeAttachedImage: (id: string) => void;
   isLoading: boolean;
   onSendMessage: () => void;
+  onStopGeneration: () => void;
   isUploading: boolean;
   fileInputRef: React.RefObject<HTMLInputElement>;
   modelDropdownRef: React.RefObject<HTMLDivElement>;
@@ -28,6 +29,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   removeAttachedImage,
   isLoading,
   onSendMessage,
+  onStopGeneration,
   isUploading,
   fileInputRef,
   modelDropdownRef,
@@ -250,13 +252,24 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 )}
               </div>
 
-              <button
-                onClick={() => onSendMessage()}
-                disabled={isLoading || (!ui.inputMessage.trim() && attachedImages.length === 0)}
-                className="p-2.5 bg-[#1a6adf] dark:bg-white text-white dark:text-black hover:opacity-95 rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
-              >
-                <Send size={15} />
-              </button>
+              {isLoading ? (
+                <button
+                  onClick={() => onStopGeneration()}
+                  className="p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-sm transition-colors cursor-pointer"
+                  title="Stop generating"
+                >
+                  <Square size={15} fill="currentColor" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => onSendMessage()}
+                  disabled={!ui.inputMessage.trim() && attachedImages.length === 0}
+                  className="p-2.5 bg-[#1a6adf] dark:bg-white text-white dark:text-black hover:opacity-95 rounded-xl shadow-sm transition-colors cursor-pointer disabled:opacity-50"
+                  title="Send message"
+                >
+                  <Send size={15} />
+                </button>
+              )}
             </div>
           </div>
         </div>
