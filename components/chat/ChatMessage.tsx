@@ -6,6 +6,7 @@ import { Message as MessageType, AIModel } from '@/types';
 import { cn, formatDate, copyToClipboard, formatMessageTimestamp } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/lib/store/toast-store';
+import { useSettingsStore } from '@/lib/store/settings-store';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { getGroupedModels, getModelDisplayName } from '@/lib/model-utils';
 
@@ -82,6 +83,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [showModelSelector, setShowModelSelector] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
   const { success, error } = useToast();
+  const { preferences } = useSettingsStore();
 
   const groupedModels = getGroupedModels();
 
@@ -187,7 +189,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         )}
 
         {/* Token count */}
-        {message.tokens && (
+        {preferences.developerMode && preferences.showTokenCount && message.tokens && (
           <div className="text-xs text-muted-foreground font-mono">
             {message.tokens} tokens
           </div>

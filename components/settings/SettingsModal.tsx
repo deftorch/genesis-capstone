@@ -209,25 +209,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                     </label>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-medium">Show token count</div>
-                      <div className="text-sm text-muted-foreground">
-                        Display token usage in messages
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={preferences.showTokenCount}
-                        onChange={(e) =>
-                          updatePreferences({ showTokenCount: e.target.checked })
-                        }
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
+
 
                   <div className="flex items-center justify-between">
                     <div>
@@ -518,6 +500,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                           </span>
                         </div>
                       )}
+                      
+                      <div className="flex items-center justify-between border-t border-gray-200 dark:border-white/10 pt-4 mt-4">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Show Token Count</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                            Display exact token usage per message to monitor API consumption.
+                          </div>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={preferences.showTokenCount || false}
+                            onChange={(e) =>
+                              updatePreferences({ showTokenCount: e.target.checked })
+                            }
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-muted peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
+                      </div>
                     </div>
                   )}
                 </div>
