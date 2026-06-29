@@ -147,7 +147,7 @@ export interface ExportOptions {
 }
 
 // Renderer and Artifact Types
-export type RendererType = 'p5' | 'd3' | 'svg' | 'mermaid' | 'twojs' | 'mojs' | 'pixi' | 'gsap' | 'anime' | 'lottie' | 'matter' | 'html' | 'remotion';
+export type RendererType = 'p5' | 'd3' | 'svg' | 'mermaid' | 'twojs' | 'mojs' | 'pixi' | 'gsap' | 'anime' | 'lottie' | 'matter' | 'html' | 'remotion' | 'plan';
 
 export interface Artifact {
   id: string;

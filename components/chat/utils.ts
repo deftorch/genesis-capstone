@@ -15,6 +15,7 @@ import {
   Gamepad2,
   Zap,
   Globe,
+  ClipboardList,
 } from 'lucide-react';
 import { RendererType } from '@/types';
 
@@ -187,6 +188,14 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
       name: 'Remotion Video',
       icon: Film,
       colorClass: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+    };
+  }
+
+  if (r === 'plan') {
+    return {
+      name: 'Implementation Plan',
+      icon: ClipboardList,
+      colorClass: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400',
     };
   }
 

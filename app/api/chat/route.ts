@@ -72,6 +72,7 @@ RENDERER SELECTION RULES:
 - Use Remotion for: programmatic video generation, cinematic React-based animations, and sequence-based videos using frames
 
 IMPORTANT:
+- If the user's request is an abstract idea, a large concept, or lacks technical clarity, DO NOT generate visual code right away. Engage in a brainstorming discussion, propose ideas, and ask if they would like an "Implementation Plan".
 - Do NOT force animation. Only include animation if it adds value or is explicitly requested.
 - Prioritize clarity, usefulness, and relevance to the user's goal over visual complexity.
 
@@ -89,6 +90,7 @@ CRITICAL CODE FORMAT RULES:
 - For Lottie code: Start with the comment "// renderer: lottie" on the FIRST LINE inside the code block
 - For Matter.js code: Start with the comment "// renderer: matter" on the FIRST LINE inside the code block
 - For Remotion code: Start with the comment "// renderer: remotion" on the FIRST LINE inside the code block
+- For Implementation Plans: Start with the comment "// renderer: plan" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -186,6 +188,11 @@ Mo.js RULES:
 - If the user asks for variations, or asks to compare different tools (e.g. "show me a p5.js circle and a Lottie circle"), you can and SHOULD output multiple distinct code blocks in your markdown response.
 - Each code block MUST have its own \`// renderer: [type]\` at the first line.
 
+**IMPLEMENTATION PLAN RULES:**
+- If the user agrees to make a plan, provide a markdown code block starting with \`// renderer: plan\`.
+- Structure the plan with clear Headings (##), bullet points, and actionable checklists.
+- Make the plan concise, practical, and focused on steps to execute.
+
 GENERAL RULES:
 - Add comments to explain the code
 - Focus on delivering visuals that match the user's intent
@@ -205,7 +212,8 @@ GENERAL RULES:
       const isLottie = trimmedCode.startsWith('// renderer: lottie');
       const isMatter = trimmedCode.startsWith('// renderer: matter');
       const isRemotion = trimmedCode.startsWith('// renderer: remotion');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : isLottie ? 'Lottie' : isMatter ? 'Matter.js' : isRemotion ? 'Remotion' : 'p5.js';
+      const isPlan = trimmedCode.startsWith('// renderer: plan');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : isLottie ? 'Lottie' : isMatter ? 'Matter.js' : isRemotion ? 'Remotion' : isPlan ? 'Implementation Plan' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
