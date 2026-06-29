@@ -52,6 +52,7 @@ const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ss
 const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
 const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
 const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
+const RemotionCanvas = dynamic(() => import('@/components/remotion/RemotionCanvas'), { ssr: false });
 const CodeDiff = dynamic(() => import('@/components/p5/CodeDiff'), { ssr: false });
 
 interface ArtifactPanelProps {
@@ -421,6 +422,8 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
         return 'Lottie Animation';
       case 'matter':
         return 'Matter.js Physics';
+      case 'remotion':
+        return 'Remotion Video Animation';
       default:
         return 'Generative Canvas';
     }
@@ -899,6 +902,8 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
                 <MatterCanvas key={`matter-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code && ui.activeRenderer === 'html' ? (
                 <HtmlCanvas key={`html-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
+              ) : ui.p5Code && ui.activeRenderer === 'remotion' ? (
+                <RemotionCanvas key={`remotion-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : ui.p5Code ? (
                 <P5Canvas key={`p5-${refreshKey}`} code={ui.p5Code} width={400} height={400} />
               ) : (

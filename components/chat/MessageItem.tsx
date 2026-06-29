@@ -29,6 +29,7 @@ const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ss
 const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
 const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
 const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
+const RemotionCanvas = dynamic(() => import('@/components/remotion/RemotionCanvas'), { ssr: false });
 
 interface MessageItemProps {
   msg: any;
@@ -125,7 +126,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   }, [msg.content, previewNode]);
 
   const renderAiMessage = (content: string, messageIndex: number) => {
-    const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5)?\n([\s\S]*?)```/g;
+    const codeRegex = /```(?:javascript|js|html|svg|mermaid|p5|remotion)?\n([\s\S]*?)```/g;
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
@@ -171,6 +172,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         rType = 'matter';
       } else if (code.includes('// renderer: html') || code.trim().toLowerCase().startsWith('<!doctype html>')) {
         rType = 'html';
+      } else if (code.includes('// renderer: remotion') || code.includes('@remotion')) {
+        rType = 'remotion';
       }
 
       const verObj = codeVersions.find((v) => v.messageIndex === messageIndex);
@@ -220,6 +223,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               {rType === 'lottie' && <LottieCanvas code={code} />}
               {rType === 'matter' && <MatterCanvas code={code} />}
               {rType === 'html' && <HtmlCanvas code={code} />}
+              {rType === 'remotion' && <RemotionCanvas code={code} />}
               {rType === 'p5' && <P5Canvas code={code} />}
             </div>
           </div>

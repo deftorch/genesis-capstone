@@ -182,6 +182,14 @@ export const getCategoryInfo = (renderer: RendererType, code: string = '', title
     };
   }
 
+  if (r === 'remotion') {
+    return {
+      name: 'Remotion Video',
+      icon: Film,
+      colorClass: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+    };
+  }
+
   if (t.includes('game') || t.includes('play') || t.includes('interactive') || c.includes('keypressed') || c.includes('mouseclicked') || c.includes('game')) {
     return {
       name: 'Game',

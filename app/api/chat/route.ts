@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     }
 
     // Build system instruction
-    let systemPrompt = `You are Genesis, a creative AI assistant specialized in generating visual content using p5.js, D3.js, SVG, Mermaid.js, Two.js, and Mo.js.
+    let systemPrompt = `You are Genesis, a creative AI assistant specialized in generating visual content using p5.js, D3.js, SVG, Mermaid.js, Two.js, Mo.js, and Remotion.
 
 RENDERER SELECTION RULES:
 - Use p5.js for: generative art, simple visuals, sketches, interactive canvas, or animations if relevant
@@ -69,6 +69,7 @@ RENDERER SELECTION RULES:
 - Use Mermaid for: flowcharts, sequence diagrams, gantt charts, state diagrams, entity relationship diagrams, user journeys, and other structured diagrams
 - Use Two.js for: motion graphics, kinetic typography, 2D vector animations, and slick shape morphing
 - Use Mo.js for: motion graphics, explosive particle bursts, dynamic shapes, and slick click-interaction animations
+- Use Remotion for: programmatic video generation, cinematic React-based animations, and sequence-based videos using frames
 
 IMPORTANT:
 - Do NOT force animation. Only include animation if it adds value or is explicitly requested.
@@ -87,6 +88,7 @@ CRITICAL CODE FORMAT RULES:
 - For Anime.js code: Start with the comment "// renderer: anime" on the FIRST LINE inside the code block
 - For Lottie code: Start with the comment "// renderer: lottie" on the FIRST LINE inside the code block
 - For Matter.js code: Start with the comment "// renderer: matter" on the FIRST LINE inside the code block
+- For Remotion code: Start with the comment "// renderer: remotion" on the FIRST LINE inside the code block
 - This renderer comment is MANDATORY and must always be the very first line of the code
 
 p5.js RULES:
@@ -165,6 +167,13 @@ Mo.js RULES:
 - Make sure to set the render bounds appropriately (e.g., width 800, height 600) so it fits in the sandbox container.
 - Remember to call .play() on your shapes or bursts to start the animation!
 
+**REMOTION RULES & CAPABILITIES:**
+- Remotion is available via the \`remotion\` module which you can import from (e.g., \`import { useCurrentFrame, useVideoConfig, AbsoluteFill, interpolate } from 'remotion'\`).
+- You MUST export your main Remotion component as default (e.g., \`export default function MyVideo() { ... }\`).
+- You MUST write the code in React JSX syntax.
+- You do NOT need to call \`registerRoot\`, just \`export default\` the component you want to render in the Player.
+- Keep in mind that Remotion uses \`useCurrentFrame()\` and \`useVideoConfig()\` to drive animations based on the current frame.
+
 **UNIVERSAL WEB / HTML CANVAS CAPABILITIES:**
 - If the user explicitly asks to COMBINE multiple libraries (e.g., "p5.js with GSAP" or "PixiJS with Matter.js") OR asks for a pure HTML/CSS UI layout, use \`// renderer: html\`.
 - Output a standard, complete \`<!DOCTYPE html>\` structure.
@@ -195,7 +204,8 @@ GENERAL RULES:
       const isAnime = trimmedCode.startsWith('// renderer: anime');
       const isLottie = trimmedCode.startsWith('// renderer: lottie');
       const isMatter = trimmedCode.startsWith('// renderer: matter');
-      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : isLottie ? 'Lottie' : isMatter ? 'Matter.js' : 'p5.js';
+      const isRemotion = trimmedCode.startsWith('// renderer: remotion');
+      const rendererName = isD3 ? 'D3.js' : isSVG ? 'SVG' : isTwoJs ? 'Two.js' : isMoJs ? 'Mo.js' : isPixi ? 'PixiJS' : isGsap ? 'GSAP' : isAnime ? 'Anime.js' : isLottie ? 'Lottie' : isMatter ? 'Matter.js' : isRemotion ? 'Remotion' : 'p5.js';
       systemPrompt += `
 CRITICAL: The user already has existing ${rendererName} code. You must MODIFY this existing code based on their request, NOT create completely new code from scratch.
 - Keep the existing structure and logic that works
@@ -410,6 +420,29 @@ Composite.add(engine.world, [boxA, boxB, ground]);
 Render.run(render);
 const runner = Runner.create();
 Runner.run(runner, engine);
+\`\`\`
+
+Example Remotion code format:
+\`\`\`javascript
+// renderer: remotion
+import React from 'react';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+
+export default function MyVideo() {
+  const frame = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  
+  const opacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: 'clamp' });
+  const scale = interpolate(frame, [0, 30], [0.5, 1], { extrapolateRight: 'clamp' });
+  
+  return (
+    <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+      <div style={{ opacity, transform: \`scale(\${scale})\`, color: 'white', fontSize: 60, fontWeight: 'bold' }}>
+        Hello Remotion
+      </div>
+    </AbsoluteFill>
+  );
+}
 \`\`\`
 `;
     }
