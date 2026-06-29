@@ -51,7 +51,10 @@ const RemotionCanvas: React.FC<RemotionCanvasProps> = ({ code, width = 400, heig
       cleanCode = cleanCode.replace(/\/\/ renderer: remotion\n?/g, '');
       
       const compiled = Babel.transform(cleanCode, {
-        presets: ['react', 'env'],
+        presets: [
+          ['react', { runtime: 'classic' }],
+          ['env', { modules: 'commonjs' }]
+        ],
       }).code;
 
       if (!compiled) {
