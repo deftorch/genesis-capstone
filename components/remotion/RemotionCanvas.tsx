@@ -5,6 +5,7 @@ import { Player } from '@remotion/player';
 import * as remotion from 'remotion';
 import * as Babel from '@babel/standalone';
 import { useSettingsStore } from '@/lib/store/settings-store';
+import { useUIStore } from '@/lib/store/ui-store';
 
 interface RemotionCanvasProps {
   code: string;
@@ -17,6 +18,8 @@ const RemotionCanvas: React.FC<RemotionCanvasProps> = ({ code, width = 400, heig
   const [Component, setComponent] = useState<React.FC<any> | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const { preferences } = useSettingsStore();
+  const ui = useUIStore();
+  const playerRef = useRef<any>(null);
 
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -85,6 +88,16 @@ const RemotionCanvas: React.FC<RemotionCanvasProps> = ({ code, width = 400, heig
     }
   }, [code, onError]);
 
+  useEffect(() => {
+    if (playerRef.current) {
+      if (ui.isPlaying) {
+        playerRef.current.play();
+      } else {
+        playerRef.current.pause();
+      }
+    }
+  }, [ui.isPlaying]);
+
   if (errorMsg) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-600 p-4 rounded-lg overflow-auto">
@@ -108,12 +121,14 @@ const RemotionCanvas: React.FC<RemotionCanvasProps> = ({ code, width = 400, heig
   return (
     <div className={`w-full h-full flex items-center justify-center ${isDark ? 'bg-[#0b0f19]' : 'bg-[#f8fafc]'} rounded-lg overflow-hidden`}>
       <Player
+        ref={playerRef}
         component={Component}
         durationInFrames={120}
         compositionWidth={1080}
         compositionHeight={1080}
         fps={30}
         controls
+        autoPlay={ui.isPlaying}
         style={{
           width: '100%',
           height: '100%',

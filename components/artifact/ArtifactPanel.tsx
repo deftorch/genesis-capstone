@@ -574,7 +574,7 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
 
           {/* Action Controls */}
           <div className="flex items-center gap-1">
-            {ui.activeRenderer === 'p5' && (
+            {['p5', 'remotion'].includes(ui.activeRenderer || '') && (
               <button
                 onClick={handleTogglePlay}
                 className="p-1.5 rounded-md transition-all cursor-pointer relative preview-panel-action text-[#60aaff] hover:bg-[#60aaff]/10"
