@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Chat, Message, ModelConfig, Project, Artifact } from '@/types';
+import { Chat, Message, ModelConfig, Project, Artifact, ImageAttachment } from '@/types';
 import { DEFAULT_MODEL_CONFIG } from '@/config/constants';
 import { generateId } from '@/lib/utils';
 import { generateMessagesSummary, shouldUpdateSummary } from '@/lib/chat-summarizer';

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Player } from '@remotion/player';
 import * as remotion from 'remotion';
 import * as Babel from '@babel/standalone';
