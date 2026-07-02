@@ -75,7 +75,6 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
           regeneratingId={regeneratingId}
           onRegenerate={onRegenerate}
           onSwitchVersionIdx={onSwitchVersionIdx}
-          onSaveMessageEdit={onSaveMessageEdit}
           codeVersions={codeVersions}
         />
       </div>
