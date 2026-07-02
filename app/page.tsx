@@ -269,6 +269,7 @@ const GenesisApp = () => {
       window.removeEventListener('dragover', handleDragOver);
       window.removeEventListener('drop', handleDrop);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ui.attachedImages.length]); // Re-bind when attached images change to keep limit check accurate
 
 
