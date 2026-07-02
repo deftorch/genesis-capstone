@@ -25,7 +25,7 @@ interface MessageItemProps {
   index: number;
   isUser: boolean;
   storeMessage: any;
-  activeVersionIdx?: number;
+  activeVersionIdx: number;
   onSwitchVersionIdx: (messageId: string, idx: number) => void;
   handleCopyText: (text: string) => void;
   isLoading: boolean;
