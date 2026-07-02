@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Paperclip, ChevronDown, Send, Square } from 'lucide-react';
+import { Loader2, Paperclip, ChevronDown, Send, Square, X, Pencil } from 'lucide-react';
 import { MessageList } from '@/components/chat/MessageList';
 import { ChatImagePreview } from '@/components/chat/ChatImagePreview';
 import { useUIStore } from '@/lib/store/ui-store';
@@ -59,6 +59,13 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
   const { preferences } = useSettingsStore();
   const { toast } = useToast();
 
+  React.useEffect(() => {
+    if (chatInputRef.current) {
+      chatInputRef.current.style.height = 'auto';
+      chatInputRef.current.style.height = `${chatInputRef.current.scrollHeight}px`;
+    }
+  }, [ui.inputMessage, chatInputRef]);
+
   return (
     <>
       <div className="flex-1 overflow-y-auto px-4 py-6">
@@ -80,6 +87,27 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
               images={attachedImages} 
               onRemoveImage={removeAttachedImage} 
             />
+            {ui.editingMessageId && (
+              <div className="mb-2 bg-[#1a6adf]/10 dark:bg-[#60aaff]/10 border border-[#1a6adf]/20 dark:border-[#60aaff]/20 rounded-lg p-2.5 flex items-center justify-between animate-fade-in">
+                <div className="flex items-center gap-2">
+                  <Pencil size={14} className="text-[#1a6adf] dark:text-[#60aaff]" />
+                  <span className="text-xs font-semibold text-[#1a6adf] dark:text-[#60aaff]">
+                    Editing message
+                  </span>
+                </div>
+                <button
+                  onClick={() => {
+                    ui.setEditingMessageId(null);
+                    ui.setInputMessage('');
+                    ui.setAttachedImages([]);
+                  }}
+                  className="w-5 h-5 flex items-center justify-center rounded-md hover:bg-[#1a6adf]/20 dark:hover:bg-[#60aaff]/20 text-[#1a6adf] dark:text-[#60aaff] transition-colors cursor-pointer"
+                  title="Cancel edit"
+                >
+                  <X size={14} strokeWidth={2.5} />
+                </button>
+              </div>
+            )}
             <textarea
               value={ui.inputMessage}
               onChange={(e) => ui.setInputMessage(e.target.value)}
@@ -91,7 +119,7 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
               }}
               disabled={isLoading}
               placeholder="What creativity do you want to realize today?"
-              className="w-full bg-transparent border-0 outline-none resize-none min-h-[36px] max-h-[150px] text-[15px] leading-relaxed text-[#0a1628] dark:text-white placeholder-[#5580bb] dark:placeholder-gray-500 disabled:opacity-50"
+              className="w-full bg-transparent border-0 outline-none resize-none min-h-[36px] max-h-[50vh] text-[15px] leading-relaxed text-[#0a1628] dark:text-white placeholder-[#5580bb] dark:placeholder-gray-500 disabled:opacity-50"
               rows={1}
               ref={chatInputRef}
             />

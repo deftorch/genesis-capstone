@@ -21,7 +21,7 @@ interface ChatStore {
   importChats: (chats: Chat[]) => void;
   
   addMessage: (chatId: string, message: Omit<Message, 'id' | 'timestamp'>) => string;
-  updateMessage: (chatId: string, messageId: string, content: string) => void;
+  updateMessage: (chatId: string, messageId: string, content: string, images?: ImageAttachment[]) => void;
   updateMessageContent: (chatId: string, messageId: string, content: string) => void;
   updateMessageTokens: (chatId: string, messageId: string, tokens: number) => void;
   updateChatTokens: (chatId: string, tokens: number) => void;
@@ -209,7 +209,7 @@ export const useChatStore = create<ChatStore>()(
         });
       },
 
-      updateMessage: (chatId: string, messageId: string, content: string) => {
+      updateMessage: (chatId: string, messageId: string, content: string, images?: ImageAttachment[]) => {
         set((state: ChatStore) => ({
           chats: state.chats.map((chat: Chat) =>
             chat.id === chatId
@@ -224,6 +224,7 @@ export const useChatStore = create<ChatStore>()(
                       return {
                         ...msg,
                         content,
+                        images: images !== undefined ? images : msg.images,
                         isEdited: true,
                         versions: newVersions,
                         activeVersionIdx: newVersions.length - 1,

@@ -7,18 +7,7 @@ import { formatDate } from '@/lib/utils';
 import { getCategoryInfo } from '@/components/chat/utils';
 import { Artifact } from '@/types';
 
-const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false });
-const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
-const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
-const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
-const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
-const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
-const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
-const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: false });
-const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
-const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
-const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
-const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
+// Canvas imports removed
 
 import { useChatNavigation } from '@/hooks/useChatNavigation';
 import { useArtifactManager } from '@/hooks/useArtifactManager';
@@ -67,17 +56,19 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
         </div>
 
         {chatStore.artifacts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <ImageIcon size={64} className="text-gray-300 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-400 mb-2">No creations yet</h2>
-            <p className="text-gray-400 text-center max-w-md">
-              Start creating with AI and your p5.js / D3.js / SVG / Mermaid creations will appear here
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+            <ImageIcon size={64} className="text-gray-400 dark:text-gray-700 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-400 mb-2">
+              No creations yet
+            </h2>
+            <p className="text-gray-500 dark:text-gray-500 text-sm max-w-sm">
+              Start creating with AI and your visual creations will appear here.
             </p>
             <button
               onClick={() => onStartNewChat()}
-              className="mt-6 px-6 py-3 bg-black dark:bg-white dark:text-black text-white rounded-xl hover:scale-102 transition-transform flex items-center gap-2 cursor-pointer"
+              className="mt-6 px-6 py-3 bg-[#1a6adf] dark:bg-white text-white dark:text-black rounded-xl hover:bg-[#1a6adf]/90 dark:hover:bg-gray-100 transition-colors flex items-center gap-2 cursor-pointer text-sm font-medium"
             >
-              <Plus size={18} /> New Creation
+              <Plus size={18} /> Create First Creation
             </button>
           </div>
         ) : (
@@ -95,31 +86,9 @@ export const GalleryView: React.FC<GalleryViewProps> = () => {
                     }
                   `}</style>
                   <div className="preview-in-gallery gallery-canvas-container w-full h-full flex items-center justify-center">
-                    {(artifact.renderer || 'p5') === 'd3' ? (
-                      <D3Canvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'svg' ? (
-                      <SVGCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'mermaid' ? (
-                      <MermaidCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'twojs' ? (
-                      <TwoCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'mojs' ? (
-                      <MoJsCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'pixi' ? (
-                      <PixiCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'gsap' ? (
-                      <GsapCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'anime' ? (
-                      <AnimeCanvas code={artifact.code} width={300} height={300} />
-                    ) : (artifact.renderer || 'p5') === 'lottie' ? (
-                      <LottieCanvas code={artifact.code} width={300} height={300} />
-                    ) : artifact.renderer === 'matter' ? (
-                      <MatterCanvas code={artifact.code} width={300} height={300} />
-                    ) : artifact.renderer === 'html' ? (
-                      <HtmlCanvas code={artifact.code} width={300} height={300} />
-                    ) : (
-                      <P5Canvas code={artifact.code} width={300} height={300} />
-                    )}
+                    <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-200 dark:bg-gray-800 rounded-lg text-center p-4">
+                      <p className="text-xs">Canvas preview disabled in UI template.</p>
+                    </div>
                   </div>
 
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-200 flex items-center justify-center z-10">

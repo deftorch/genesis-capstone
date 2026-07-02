@@ -12,37 +12,19 @@ import {
   ThumbsUp,
   Loader2,
   FileText,
+  Maximize2,
 } from 'lucide-react';
 import { useUIStore } from '@/lib/store/ui-store';
 import { formatMessageTimestamp } from '@/lib/utils';
 import { RendererType } from '@/types';
 
-const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false });
-const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
-const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
-const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
-const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
-const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
-const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
-const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: false });
-const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
-const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
-const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
-const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
-const RemotionCanvas = dynamic(() => import('@/components/remotion/RemotionCanvas'), { ssr: false });
-const PlanCanvas = dynamic(() => import('@/components/plan/PlanCanvas'), { ssr: false });
+// Canvas imports removed
 
 interface MessageItemProps {
   msg: any;
   index: number;
   isUser: boolean;
   storeMessage: any;
-  activeVersionIdx: number;
-  editingMessageId: string | null;
-  editingMessageText: string;
-  setEditingMessageText: (text: string) => void;
-  handleSaveHomeEdit: (id: string, index: number) => void;
-  setEditingMessageId: (id: string | null) => void;
   onSwitchVersionIdx: (messageId: string, idx: number) => void;
   handleCopyText: (text: string) => void;
   isLoading: boolean;
@@ -71,11 +53,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   isUser,
   storeMessage,
   activeVersionIdx,
-  editingMessageId,
-  editingMessageText,
-  setEditingMessageText,
-  handleSaveHomeEdit,
-  setEditingMessageId,
   onSwitchVersionIdx,
   handleCopyText,
   isLoading,
@@ -215,20 +192,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                 transform: `scale(${previewWidth / 800})`
               }}
             >
-              {rType === 'd3' && <D3Canvas code={code} />}
-              {rType === 'svg' && <SVGCanvas code={code} />}
-              {rType === 'mermaid' && <MermaidCanvas code={code} />}
-              {rType === 'twojs' && <TwoCanvas code={code} />}
-              {rType === 'mojs' && <MoJsCanvas code={code} />}
-              {rType === 'pixi' && <PixiCanvas code={code} />}
-              {rType === 'gsap' && <GsapCanvas code={code} />}
-              {rType === 'anime' && <AnimeCanvas code={code} />}
-              {rType === 'lottie' && <LottieCanvas code={code} />}
-              {rType === 'matter' && <MatterCanvas code={code} />}
-              {rType === 'html' && <HtmlCanvas code={code} />}
-              {rType === 'remotion' && <RemotionCanvas code={code} />}
-              {rType === 'plan' && <PlanCanvas code={code} />}
-              {rType === 'p5' && <P5Canvas code={code} />}
+              <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-200 dark:bg-gray-800 rounded-lg">
+                <p>Canvas components have been disabled in this UI preview.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -282,33 +248,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           }`}
         >
           {isUser ? (
-            editingMessageId === storeMessage?.id && storeMessage ? (
-              <div className="space-y-2 min-w-[220px]">
-                <textarea
-                  value={editingMessageText}
-                  onChange={(e) => setEditingMessageText(e.target.value)}
-                  className="w-full min-h-[60px] p-2 rounded-md border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1a1525] text-sm text-gray-900 dark:text-white resize-y"
-                  autoFocus
-                />
-                <div className="flex gap-2 justify-end">
-                  <button
-                    onClick={() => handleSaveHomeEdit(storeMessage.id, index)}
-                    className="px-2.5 py-1 bg-white text-black rounded text-xs font-semibold hover:bg-gray-100"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingMessageId(null)}
-                    className="px-2.5 py-1 border border-white/20 rounded text-xs font-semibold text-white/80 hover:bg-white/10"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
               <div>
                 {msg.images && msg.images.length > 0 && (
-                  <div className="mb-2 flex flex-wrap gap-2">
+                  <div className="mb-2 flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/20 custom-scrollbar">
                     {msg.images.map((img: any, imgIdx: number) => {
                       const isObject = typeof img === 'object';
                       const url = isObject ? (img.preview || img.url) : img;
@@ -316,14 +258,35 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                       const name = isObject ? img.name : `Attached image ${imgIdx + 1}`;
                       
                       return isImage ? (
-                        <img
-                          key={imgIdx}
-                          src={url}
-                          alt={name}
-                          className="max-w-[260px] max-h-[200px] object-cover rounded-xl border border-white/20 shadow-sm bg-background"
-                        />
+                        <div 
+                          key={imgIdx} 
+                          className="relative group/image shrink-0 cursor-pointer" 
+                          onClick={() => {
+                            if (isObject) {
+                              ui.setAnnotatingImage(img);
+                            } else {
+                              ui.setAnnotatingImage({
+                                id: `msg-img-${imgIdx}`,
+                                url: url,
+                                preview: url,
+                                name: name,
+                                type: 'image/png',
+                                size: 0
+                              });
+                            }
+                          }}
+                        >
+                          <img
+                            src={url}
+                            alt={name}
+                            className="max-w-[260px] max-h-[200px] object-cover rounded-xl border border-white/20 shadow-sm bg-background"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                            <Maximize2 className="text-white w-6 h-6" />
+                          </div>
+                        </div>
                       ) : (
-                        <div key={imgIdx} className="flex flex-col items-center justify-center bg-muted rounded-xl border border-white/20 shadow-sm overflow-hidden w-24 h-24">
+                        <div key={imgIdx} className="shrink-0 flex flex-col items-center justify-center bg-muted rounded-xl border border-white/20 shadow-sm overflow-hidden w-24 h-24">
                           <FileText className="h-8 w-8 text-muted-foreground mb-1" />
                           <span className="text-[10px] text-muted-foreground font-medium uppercase px-2 truncate w-full text-center">
                             {name.split('.').pop()}
@@ -334,12 +297,11 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                   </div>
                 )}
                 {msg.content && (
-                  <div className="whitespace-pre-wrap text-sm leading-relaxed text-left">
+                  <div className="whitespace-pre-wrap break-words text-sm leading-relaxed text-left">
                     {msg.content}
                   </div>
                 )}
               </div>
-            )
           ) : (
             renderAiMessage(msg.content, index)
           )}
@@ -419,8 +381,15 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           {isUser && storeMessage && (
             <button
               onClick={() => {
-                setEditingMessageId(storeMessage.id);
-                setEditingMessageText(msg.content);
+                ui.setEditingMessageId(storeMessage.id);
+                ui.setInputMessage(msg.content);
+                if (storeMessage.images && Array.isArray(storeMessage.images)) {
+                  ui.setAttachedImages(storeMessage.images);
+                } else {
+                  ui.setAttachedImages([]);
+                }
+                const input = document.getElementById('chat-input-textarea');
+                if (input) input.focus();
               }}
               className="hover:text-[#1a6adf] dark:hover:text-white transition-colors cursor-pointer"
               title="Edit message"

@@ -21,7 +21,7 @@ export const ChatsView: React.FC<ChatsViewProps> = ({
 
   return (
     <div className="flex-1 overflow-y-auto p-8 animate-fade-in bg-transparent">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">
@@ -91,17 +91,19 @@ export const ChatsView: React.FC<ChatsViewProps> = ({
         </div>
 
         {sortedChats.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <MessageSquare size={48} className="text-gray-300 dark:text-gray-600 mb-4" />
-            <h2 className="text-xl font-semibold text-gray-400 mb-2">No chats yet</h2>
-            <p className="text-gray-400 max-w-sm">
-              Start a conversation with Genesis and it will appear here
+          <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
+            <MessageSquare size={64} className="text-gray-400 dark:text-gray-700 mb-4" />
+            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-400 mb-2">
+              No chats yet
+            </h2>
+            <p className="text-gray-500 dark:text-gray-500 text-sm max-w-sm">
+              Start a conversation with AI and it will appear here.
             </p>
             <button
               onClick={() => onStartNewChat()}
-              className="mt-6 px-6 py-3 bg-[#1a6adf] dark:bg-white text-white dark:text-black rounded-xl hover:opacity-90 transition-opacity font-medium shadow-sm"
+              className="mt-6 px-6 py-3 bg-[#1a6adf] dark:bg-white text-white dark:text-black rounded-xl hover:bg-[#1a6adf]/90 dark:hover:bg-gray-100 transition-colors flex items-center gap-2 cursor-pointer text-sm font-medium"
             >
-              Create first chat
+              <Plus size={18} /> Create First Chat
             </button>
           </div>
         ) : (

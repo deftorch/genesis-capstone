@@ -180,7 +180,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
               <span>Free Plan</span>
               <span className="opacity-60">·</span>
               <button
-                onClick={() => ui.setIsSettingsOpen(true)}
+                onClick={() => ui.setIsUpgradeModalOpen(true)}
                 className="text-[#1a5acc] dark:text-[#b8d4ff] hover:text-[#0a1628] dark:hover:text-white hover:underline transition-all font-semibold cursor-pointer"
               >
                 Upgrade
@@ -188,7 +188,7 @@ export const ChatPanel: React.FC<ChatPanelProps> = ({
             </div>
 
             <button
-              onClick={() => ui.setIsSettingsOpen(true)}
+              onClick={() => ui.setIsUpgradeModalOpen(true)}
               className="flex sm:hidden w-8 h-8 rounded-full items-center justify-center bg-gradient-to-r from-[#1a6adf] to-[#508cf0] dark:from-[#60aaff]/15 dark:to-[#60aaff]/30 text-white dark:text-[#60aaff] border border-[#1a6adf]/30 dark:border-[#60aaff]/30 shadow-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer"
               title="Upgrade Plan"
             >

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { UploadCloud } from 'lucide-react';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useToast } from '@/lib/store/toast-store';
@@ -12,6 +13,8 @@ import { ChatPanel } from '@/components/chat/ChatPanel';
 import { ArtifactPanel } from '@/components/artifact/ArtifactPanel';
 
 import { SettingsModal } from '@/components/settings/SettingsModal';
+import { UpgradeModal } from '@/components/settings/UpgradeModal';
+import { ImageAnnotator } from '@/components/image/ImageAnnotator';
 
 import { useChatSubmit } from '@/hooks/useChatSubmit';
 import { useVersionHistory } from '@/hooks/useVersionHistory';
@@ -35,6 +38,8 @@ const GenesisApp = () => {
   const [selectedModel, setSelectedModel] = useState<AIModel>('gemini-3-flash');
   const [isUploading, setIsUploading] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
@@ -111,6 +116,14 @@ const GenesisApp = () => {
     const text = customPrompt || ui.inputMessage;
     if (!text.trim() && ui.attachedImages.length === 0) return;
 
+    if (ui.editingMessageId) {
+      await handleSaveMessageEdit(ui.editingMessageId, 0, text, ui.attachedImages);
+      ui.setEditingMessageId(null);
+      ui.setInputMessage('');
+      ui.setAttachedImages([]);
+      return;
+    }
+
     const prevActiveChatId = ui.activeChatId;
     const currentImages = [...ui.attachedImages];
     ui.setAttachedImages([]);
@@ -118,9 +131,9 @@ const GenesisApp = () => {
     await chatSubmit(text, messages, currentImages, prevActiveChatId);
   };
 
-  const handleSaveMessageEdit = async (messageId: string, index: number, text: string) => {
+  const handleSaveMessageEdit = async (messageId: string, index: number, text: string, images?: ImageAttachment[]) => {
     if (handleRegenerateFrom) {
-      await handleRegenerateFrom(messageId, text);
+      await handleRegenerateFrom(messageId, text, images);
     }
   };
 
@@ -136,9 +149,7 @@ const GenesisApp = () => {
     }
   };
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-
+  const processFiles = async (files: File[]) => {
     const validFiles = files.filter((file) => {
       if (!FILE_UPLOAD_CONFIG.acceptedTypes.includes(file.type)) {
         toast({
@@ -197,6 +208,68 @@ const GenesisApp = () => {
       }
     }
   };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    await processFiles(files);
+  };
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
+        const files = Array.from(e.clipboardData.files);
+        processFiles(files);
+      }
+    };
+
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter.current++;
+      if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+        setIsDragging(true);
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter.current--;
+      if (dragCounter.current === 0) {
+        setIsDragging(false);
+      }
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const handleDrop = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter.current = 0;
+      setIsDragging(false);
+      if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+        const files = Array.from(e.dataTransfer.files);
+        processFiles(files);
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    window.addEventListener('dragenter', handleDragEnter);
+    window.addEventListener('dragleave', handleDragLeave);
+    window.addEventListener('dragover', handleDragOver);
+    window.addEventListener('drop', handleDrop);
+
+    return () => {
+      window.removeEventListener('paste', handlePaste);
+      window.removeEventListener('dragenter', handleDragEnter);
+      window.removeEventListener('dragleave', handleDragLeave);
+      window.removeEventListener('dragover', handleDragOver);
+      window.removeEventListener('drop', handleDrop);
+    };
+  }, [ui.attachedImages.length]); // Re-bind when attached images change to keep limit check accurate
 
 
 
@@ -268,7 +341,24 @@ const GenesisApp = () => {
         )}
       </AppShell>
 
+      {/* Settings Modal */}
       <SettingsModal isOpen={ui.isSettingsOpen} onClose={() => ui.setIsSettingsOpen(false)} />
+
+      {/* Upgrade Modal */}
+      {ui.isUpgradeModalOpen && <UpgradeModal />}
+
+      {/* Drag & Drop Overlay */}
+      {isDragging && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 pointer-events-none animate-in fade-in duration-200">
+          <div className="absolute inset-4 border-2 border-dashed border-[#60aaff] rounded-2xl bg-[#1a6adf]/10 flex flex-col items-center justify-center">
+            <UploadCloud size={32} className="text-[#60aaff] mb-3 animate-bounce" />
+            <span className="text-xl font-medium text-white">Drop files to upload</span>
+          </div>
+        </div>
+      )}
+
+      {/* Image Annotator */}
+      {ui.annotatingImage && <ImageAnnotator />}
     </>
   );
 };

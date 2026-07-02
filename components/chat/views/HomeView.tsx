@@ -6,6 +6,7 @@ import { useToast } from '@/lib/store/toast-store';
 import { ChatImagePreview } from '@/components/chat/ChatImagePreview';
 import { AIModel, ImageAttachment } from '@/types';
 import { FILE_UPLOAD_CONFIG, AI_MODELS } from '@/config/constants';
+import { cn } from '@/lib/utils';
 
 interface HomeViewProps {
   chatInputRef: React.RefObject<HTMLTextAreaElement>;
@@ -43,12 +44,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const { toast } = useToast();
 
   const [greeting, setGreeting] = React.useState('Welcome back');
+  const [expandLevel, setExpandLevel] = React.useState(0);
+
   React.useEffect(() => {
     const hrs = new Date().getHours();
     if (hrs < 12) setGreeting('Good morning');
     else if (hrs < 17) setGreeting('Good afternoon');
     else setGreeting('Good evening');
   }, []);
+
+  React.useEffect(() => {
+    if (chatInputRef.current) {
+      chatInputRef.current.style.height = 'auto';
+      const currentHeight = chatInputRef.current.scrollHeight;
+      chatInputRef.current.style.height = `${currentHeight}px`;
+      
+      if (currentHeight > 90) setExpandLevel(3);
+      else if (currentHeight > 68) setExpandLevel(2);
+      else if (currentHeight > 48) setExpandLevel(1);
+      else setExpandLevel(0);
+    }
+  }, [ui.inputMessage, chatInputRef]);
 
   const creationTools = [
     { name: 'Canvas', icon: Layout, prompt: 'Create a colorful animated canvas' },
@@ -95,7 +111,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
   return (
     <div className="flex-1 flex flex-col items-center justify-between md:justify-center p-4 md:p-8 md:gap-6 max-w-3xl mx-auto w-full h-full">
-      <div className="flex-1 md:flex-initial flex flex-col items-center justify-center text-center">
+      <div className={cn(
+        "flex flex-col items-center justify-center text-center transition-all duration-500 ease-in-out overflow-hidden",
+        expandLevel >= 3 ? "opacity-0 max-h-0 m-0" : "flex-1 md:flex-initial opacity-100 max-h-[300px]"
+      )}>
         <div className="flex flex-col md:flex-row items-center gap-3.5 animate-fade-in mb-2 text-center md:text-left">
           <div className="w-[38px] h-[38px] flex-shrink-0 mb-2 md:mb-0">
             <svg className="w-full h-full mx-auto md:mx-0" viewBox="0 0 32 32" fill="none">
@@ -123,7 +142,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {greeting}, Creator
           </h1>
         </div>
-        <p className="hidden md:block text-gray-500 dark:text-[#b8d4ff]/80 text-center max-w-md text-sm leading-relaxed mb-2">
+        <p className={cn(
+          "hidden md:block text-gray-500 dark:text-[#b8d4ff]/80 text-center max-w-md text-sm leading-relaxed transition-all duration-500 ease-in-out overflow-hidden",
+          expandLevel >= 1 ? "opacity-0 max-h-0 m-0" : "opacity-100 max-h-[60px] mb-2"
+        )}>
           Create stunning visual content with AI. Describe what you want, and watch it come to life in real-time.
         </p>
       </div>
@@ -186,7 +208,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             }}
             disabled={isLoading}
             placeholder="What creativity do you want to realize today?"
-            className="w-full bg-transparent border-0 outline-none resize-none min-h-[44px] max-h-[180px] text-base leading-relaxed text-[#0a1628] dark:text-white placeholder-[#5580bb] dark:placeholder-gray-500 disabled:opacity-50"
+            className="w-full bg-transparent border-0 outline-none resize-none min-h-[44px] max-h-[60vh] text-base leading-relaxed text-[#0a1628] dark:text-white placeholder-[#5580bb] dark:placeholder-gray-500 disabled:opacity-50"
             rows={1}
             ref={chatInputRef}
           />
@@ -275,7 +297,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         {/* Quick template pills for desktop view */}
-        <div className="hidden md:flex flex-wrap justify-center gap-2 w-full select-none">
+        <div className={cn(
+          "hidden md:flex flex-wrap justify-center gap-2 w-full select-none transition-all duration-500 ease-in-out overflow-hidden",
+          expandLevel >= 2 ? "opacity-0 max-h-0 mt-0" : "opacity-100 max-h-[200px] mt-2"
+        )}>
           {creationTools.map((tool, index) => {
             const Icon = tool.icon;
             return (

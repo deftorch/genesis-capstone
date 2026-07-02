@@ -10,7 +10,6 @@ interface MessageListProps {
   regeneratingId: string | null;
   onRegenerate: (messageId: string) => void;
   onSwitchVersionIdx: (messageId: string, idx: number) => void;
-  onSaveMessageEdit: (messageId: string, index: number, text: string) => void;
   codeVersions: any[];
 }
 
@@ -20,7 +19,6 @@ export const MessageList: React.FC<MessageListProps> = ({
   regeneratingId,
   onRegenerate,
   onSwitchVersionIdx,
-  onSaveMessageEdit,
   codeVersions,
 }) => {
 
@@ -29,8 +27,6 @@ export const MessageList: React.FC<MessageListProps> = ({
   const { toast } = useToast();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-  const [editingMessageText, setEditingMessageText] = useState<string>('');
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,10 +40,6 @@ export const MessageList: React.FC<MessageListProps> = ({
     });
   };
 
-  const handleSaveHomeEdit = (id: string, index: number) => {
-    onSaveMessageEdit(id, index, editingMessageText);
-    setEditingMessageId(null);
-  };
 
   if (messages.length === 0) {
     return (
@@ -79,11 +71,6 @@ export const MessageList: React.FC<MessageListProps> = ({
             isUser={isUser}
             storeMessage={storeMessage}
             activeVersionIdx={activeVersionIdx}
-            editingMessageId={editingMessageId}
-            editingMessageText={editingMessageText}
-            setEditingMessageText={setEditingMessageText}
-            handleSaveHomeEdit={handleSaveHomeEdit}
-            setEditingMessageId={setEditingMessageId}
             onSwitchVersionIdx={onSwitchVersionIdx}
             handleCopyText={handleCopyText}
             isLoading={isLoading}

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Settings2, Key, Palette, Shield, Download, Upload, Sparkles, Sun, Moon, Laptop } from 'lucide-react';
+import { X, Settings2, Key, Palette, Shield, Download, Upload, Sparkles, Sun, Moon, Laptop, AlertTriangle } from 'lucide-react';
 import { Modal, ModalHeader, ModalContent } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -400,7 +400,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   {/* Danger Zone */}
                   <div className="border-2 border-destructive/20 rounded-lg p-4 bg-destructive/5">
                     <div className="font-medium mb-2 text-destructive flex items-center gap-2">
-                      ⚠️ Danger Zone
+                      <AlertTriangle className="h-4 w-4" />
+                      Danger Zone
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
                       This will permanently delete all your chats, settings, and API keys.

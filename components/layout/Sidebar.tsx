@@ -64,8 +64,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const starredChats = sortedChats.filter(c => c.isStarred);
   const unstarredChats = sortedChats.filter(c => !c.isStarred);
+  const lastTwoUnstarredIds = unstarredChats.slice(-2).map(c => c.id);
 
-  const renderChatItem = (chat: any) => (
+  const renderChatItem = (chat: any, isNearBottom: boolean = false) => (
     <div
       key={chat.id}
       className={`group flex items-center gap-1 px-2 py-2 rounded-lg transition-colors cursor-pointer ${ui.activeChatId === chat.id && ui.currentView === 'chat' ? 'bg-[#1a6adf]/18 dark:bg-white/10 text-[#0a1628] dark:text-white shadow-sm' : 'text-[#3a6aaa] hover:text-[#0a1628] hover:bg-[#1a6adf]/14 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5'}`}
@@ -121,7 +122,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {ui.chatMenuOpenId === chat.id && (
               <>
                 <div className="fixed inset-0 z-30" onClick={() => ui.setChatMenuOpenId(null)} />
-                <div className="absolute right-0 top-7 z-40 w-44 bg-white dark:bg-[#1a1525] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-fade-in text-gray-900 dark:text-white">
+                <div className={`absolute right-0 ${isNearBottom ? 'bottom-full mb-1' : 'top-7'} z-50 w-44 bg-white dark:bg-[#1a1525] border border-gray-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden animate-fade-in text-gray-900 dark:text-white`}>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -314,7 +315,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         </button>
                         {isFavoritesOpen && (
                           <div className="space-y-1">
-                            {starredChats.map(renderChatItem)}
+                            {starredChats.map(c => renderChatItem(c, false))}
                           </div>
                         )}
                       </div>
@@ -327,7 +328,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <Clock size={12} /> RECENT CREATIONS
                         </h3>
                         <div className="space-y-1">
-                          {unstarredChats.map(renderChatItem)}
+                          {unstarredChats.map(c => renderChatItem(c, lastTwoUnstarredIds.includes(c.id)))}
                         </div>
                       </div>
                     )}
@@ -409,7 +410,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               {/* New chat */}
               <button
                 onClick={onStartNewChat}
-                className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer relative ${ui.currentView === 'home' ? 'bg-[#1a6adf]/18 text-[#0a1628] border border-[#1a6adf]/30 dark:bg-[#60aaff]/15 dark:text-[#60aaff] dark:border-[#60aaff]/20' : 'text-[#3a6aaa] hover:text-[#0a1628] hover:bg-[#1a6adf]/14 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10'}`}
+                className="w-9 h-9 rounded-lg flex items-center justify-center transition-all cursor-pointer relative text-[#3a6aaa] hover:text-[#0a1628] hover:bg-[#1a6adf]/14 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10"
                 title="New chat"
               >
                 <SquarePen size={18} />

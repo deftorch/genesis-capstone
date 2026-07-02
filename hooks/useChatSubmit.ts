@@ -88,6 +88,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
       role: 'user',
       content: messageToSend,
       tokens: 0,
+      images: images.length > 0 ? images : undefined,
     });
 
     const controller = new AbortController();
@@ -212,7 +213,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
     }
   }, [chatId, selectedModel, ui, chatStore, buildImagePayloads]);
 
-  const handleRegenerateFrom = useCallback(async (messageId: string, newContent?: string) => {
+  const handleRegenerateFrom = useCallback(async (messageId: string, newContent?: string, newImages?: ImageAttachment[]) => {
     if (!chatId) return;
     const chat = chatStore.chats.find((c) => c.id === chatId);
     if (!chat) return;
@@ -221,8 +222,8 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
     if (messageIndex === -1) return;
 
     if (newContent !== undefined) {
-      if (!newContent.trim()) return;
-      chatStore.updateMessage(chatId, messageId, newContent);
+      if (!newContent.trim() && (!newImages || newImages.length === 0)) return;
+      chatStore.updateMessage(chatId, messageId, newContent, newImages);
     }
 
     const updatedChat = chatStore.chats.find((c) => c.id === chatId);
@@ -262,6 +263,9 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
 
     try {
       const hasCodeContext = history.some((m) => m.content.includes('// renderer:'));
+      
+      const imagePayloads = newImages ? buildImagePayloads(newImages) : undefined;
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -270,6 +274,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
           messages: history,
           model: selectedModel || 'gemini-3-flash',
           currentCode: hasCodeContext ? ui.editableCode || '' : '',
+          images: imagePayloads && imagePayloads.length > 0 ? imagePayloads : undefined,
         }),
       });
 
