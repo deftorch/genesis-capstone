@@ -59,6 +59,7 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
   const ui = useUIStore();
   const { preferences } = useSettingsStore();
   const { toast } = useToast();
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (chatInputRef.current) {
