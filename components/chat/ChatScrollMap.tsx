@@ -7,6 +7,7 @@ interface ChatScrollMapProps {
 
 export const ChatScrollMap: React.FC<ChatScrollMapProps> = ({ containerRef, messages }) => {
   const [hoveredMarkerId, setHoveredMarkerId] = useState<string | null>(null);
+  const [userMarkers, setUserMarkers] = useState<{ id: string; top: number; text: string; absoluteTop: number }[]>([]);
 
   const calculateMarkers = () => {
     if (!containerRef.current) return;
@@ -35,6 +36,7 @@ export const ChatScrollMap: React.FC<ChatScrollMapProps> = ({ containerRef, mess
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const t1 = setTimeout(calculateMarkers, 100);
     const t2 = setTimeout(calculateMarkers, 500);
     const t3 = setTimeout(calculateMarkers, 1000);
