@@ -58,18 +58,18 @@ export const ChatScrollMap: React.FC<ChatScrollMapProps> = ({ containerRef, mess
   };
 
   return (
-    <div className="absolute right-0 top-0 bottom-0 w-[14px] pointer-events-none z-50">
+    <div className="absolute right-0 top-0 bottom-0 w-4 pointer-events-none z-50">
       {userMarkers.map(marker => (
         <div
           key={marker.id}
-          className="absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 opacity-50 hover:opacity-100 hover:scale-[2] transition-all pointer-events-auto cursor-pointer"
-          style={{ top: `${marker.top}%`, marginTop: '-3px' }}
+          className="absolute right-1 w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 opacity-40 hover:opacity-100 hover:scale-150 transition-all pointer-events-auto cursor-pointer"
+          style={{ top: `${marker.top}%`, marginTop: '-4px' }}
           onMouseEnter={() => setHoveredMarkerId(marker.id)}
           onMouseLeave={() => setHoveredMarkerId(null)}
           onClick={() => scrollToMessage(marker.id)}
         >
           {hoveredMarkerId === marker.id && (
-            <div className="absolute right-full mr-4 top-1/2 -translate-y-1/2 w-48 bg-[#1f2937]/90 dark:bg-[#0f172a]/90 backdrop-blur-md text-white text-[11px] px-3 py-2 rounded-lg shadow-xl border border-white/10 pointer-events-none flex flex-col gap-1 z-50">
+            <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 w-48 bg-[#1f2937]/90 dark:bg-[#0f172a]/90 backdrop-blur-sm text-white text-[11px] px-3 py-2 rounded-lg shadow-xl border border-white/10 pointer-events-none flex flex-col gap-1 z-50">
               <span className="text-[#60aaff] font-semibold text-[9px] uppercase tracking-wider">User Prompt</span>
               <span className="line-clamp-2 leading-relaxed">{marker.text}</span>
             </div>
