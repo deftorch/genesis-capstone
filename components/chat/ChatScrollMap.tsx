@@ -62,8 +62,8 @@ export const ChatScrollMap: React.FC<ChatScrollMapProps> = ({ containerRef, mess
       {userMarkers.map(marker => (
         <div
           key={marker.id}
-          className="absolute right-1 w-2 h-2 rounded-full bg-gray-400 dark:bg-gray-500 opacity-40 hover:opacity-100 hover:scale-150 transition-all pointer-events-auto cursor-pointer"
-          style={{ top: `${marker.top}%`, marginTop: '-4px' }}
+          className="absolute right-0 w-[6px] h-[6px] rounded-full bg-gray-400 dark:bg-gray-500 opacity-40 hover:opacity-100 hover:scale-150 transition-all pointer-events-auto cursor-pointer"
+          style={{ top: `${marker.top}%`, marginTop: '-3px' }}
           onMouseEnter={() => setHoveredMarkerId(marker.id)}
           onMouseLeave={() => setHoveredMarkerId(null)}
           onClick={() => scrollToMessage(marker.id)}
