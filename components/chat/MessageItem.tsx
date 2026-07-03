@@ -239,7 +239,11 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   };
 
   return (
-    <div className={`flex gap-3 ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in w-full`}>
+    <div 
+      className={`flex gap-3 ${isUser ? 'justify-end user-message-marker' : 'justify-start'} animate-fade-in w-full`}
+      data-msg-id={storeMessage?.id || msg.id}
+      data-msg-text={isUser ? (storeMessage?.content || msg.content) : ''}
+    >
       <div className={`flex flex-col gap-1.5 group ${!isUser && !ui.showArtifact ? 'w-full max-w-full' : 'max-w-[92%] sm:max-w-[80%]'}`}>
         <div
           className={`p-4 rounded-xl shadow-sm border ${

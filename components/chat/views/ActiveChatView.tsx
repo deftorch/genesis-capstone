@@ -2,6 +2,7 @@ import React from 'react';
 import { Loader2, Paperclip, ChevronDown, Send, Square, X, Pencil } from 'lucide-react';
 import { MessageList } from '@/components/chat/MessageList';
 import { ChatImagePreview } from '@/components/chat/ChatImagePreview';
+import { ChatScrollMap } from '@/components/chat/ChatScrollMap';
 import { useUIStore } from '@/lib/store/ui-store';
 import { useSettingsStore } from '@/lib/store/settings-store';
 import { useToast } from '@/lib/store/toast-store';
@@ -68,15 +69,18 @@ export const ActiveChatView: React.FC<ActiveChatViewProps> = ({
 
   return (
     <>
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <MessageList
-          messages={messages}
-          isLoading={isLoading}
-          regeneratingId={regeneratingId}
-          onRegenerate={onRegenerate}
-          onSwitchVersionIdx={onSwitchVersionIdx}
-          codeVersions={codeVersions}
-        />
+      <div className="flex-1 relative min-h-0">
+        <div className="absolute inset-0 overflow-y-auto px-4 py-6" ref={scrollContainerRef}>
+          <MessageList
+            messages={messages}
+            isLoading={isLoading}
+            regeneratingId={regeneratingId}
+            onRegenerate={onRegenerate}
+            onSwitchVersionIdx={onSwitchVersionIdx}
+            codeVersions={codeVersions}
+          />
+        </div>
+        <ChatScrollMap containerRef={scrollContainerRef} messages={messages} />
       </div>
 
       <div className="border-t border-[#1e468c]/12 dark:border-white/10 p-4 flex-shrink-0 bg-transparent w-full">
