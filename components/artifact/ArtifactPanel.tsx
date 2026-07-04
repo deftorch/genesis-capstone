@@ -40,7 +40,21 @@ import { useToast } from '@/lib/store/toast-store';
 import { CodeEditor } from './CodeEditor';
 import { getCategoryInfo } from '@/components/chat/utils';
 
-// Canvas imports removed
+// Canvas imports
+const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false });
+const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
+const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
+const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
+const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
+const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
+const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
+const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: false });
+const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
+const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
+const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
+const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
+const RemotionCanvas = dynamic(() => import('@/components/remotion/RemotionCanvas'), { ssr: false });
+const PlanCanvas = dynamic(() => import('@/components/plan/PlanCanvas'), { ssr: false });
 
 interface ArtifactPanelProps {
   onSendMessage: (customPrompt?: string) => Promise<void>;
@@ -870,11 +884,21 @@ export const ArtifactPanel: React.FC<ArtifactPanelProps> = ({
               }}
             >
               {ui.p5Code ? (
-                <div className="bg-gray-200 dark:bg-gray-800 h-full flex items-center justify-center rounded-lg w-full">
-                  <div className="text-center text-gray-500">
-                    <p className="text-lg font-semibold">Canvas Disabled</p>
-                    <p className="text-sm">Renderer logic has been removed.</p>
-                  </div>
+                <div key={refreshKey} className="w-full h-full">
+                  {ui.activeRenderer === 'p5' && <P5Canvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'd3' && <D3Canvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'svg' && <SVGCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'mermaid' && <MermaidCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'twojs' && <TwoCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'mojs' && <MoJsCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'pixi' && <PixiCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'gsap' && <GsapCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'anime' && <AnimeCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'lottie' && <LottieCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'matter' && <MatterCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'html' && <HtmlCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'remotion' && <RemotionCanvas code={ui.p5Code} />}
+                  {ui.activeRenderer === 'plan' && <PlanCanvas code={ui.p5Code} />}
                 </div>
               ) : (
                 <div className="bg-gray-200 h-full flex items-center justify-center rounded-lg w-full">

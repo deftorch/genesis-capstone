@@ -18,8 +18,21 @@ import { useUIStore } from '@/lib/store/ui-store';
 import { formatMessageTimestamp } from '@/lib/utils';
 import { RendererType } from '@/types';
 
-// Canvas imports removed
-
+// Canvas imports
+const P5Canvas = dynamic(() => import('@/components/p5/P5Canvas'), { ssr: false });
+const D3Canvas = dynamic(() => import('@/components/d3/D3Canvas'), { ssr: false });
+const SVGCanvas = dynamic(() => import('@/components/svg/SVGCanvas'), { ssr: false });
+const MermaidCanvas = dynamic(() => import('@/components/mermaid/MermaidCanvas'), { ssr: false });
+const TwoCanvas = dynamic(() => import('@/components/twojs/TwoCanvas'), { ssr: false });
+const MoJsCanvas = dynamic(() => import('@/components/mojs/MoJsCanvas'), { ssr: false });
+const PixiCanvas = dynamic(() => import('@/components/pixi/PixiCanvas'), { ssr: false });
+const GsapCanvas = dynamic(() => import('@/components/gsap/GsapCanvas'), { ssr: false });
+const AnimeCanvas = dynamic(() => import('@/components/anime/AnimeCanvas'), { ssr: false });
+const LottieCanvas = dynamic(() => import('@/components/lottie/LottieCanvas'), { ssr: false });
+const MatterCanvas = dynamic(() => import('@/components/matter/MatterCanvas'), { ssr: false });
+const HtmlCanvas = dynamic(() => import('@/components/html/HtmlCanvas'), { ssr: false });
+const RemotionCanvas = dynamic(() => import('@/components/remotion/RemotionCanvas'), { ssr: false });
+const PlanCanvas = dynamic(() => import('@/components/plan/PlanCanvas'), { ssr: false });
 interface MessageItemProps {
   msg: any;
   index: number;
@@ -186,16 +199,27 @@ export const MessageItem: React.FC<MessageItemProps> = ({
             }`}
           >
             <div 
-              className="absolute left-0 top-0 origin-top-left"
+              className="absolute left-0 top-0 origin-top-left h-full"
               style={{ 
                 width: '800px', 
                 height: '500px',
                 transform: `scale(${previewWidth / 800})`
               }}
             >
-              <div className="w-full h-full flex items-center justify-center text-gray-500 bg-gray-200 dark:bg-gray-800 rounded-lg">
-                <p>Canvas components have been disabled in this UI preview.</p>
-              </div>
+              {rType === 'p5' && <P5Canvas code={code} />}
+              {rType === 'd3' && <D3Canvas code={code} />}
+              {rType === 'svg' && <SVGCanvas code={code} />}
+              {rType === 'mermaid' && <MermaidCanvas code={code} />}
+              {rType === 'twojs' && <TwoCanvas code={code} />}
+              {rType === 'mojs' && <MoJsCanvas code={code} />}
+              {rType === 'pixi' && <PixiCanvas code={code} />}
+              {rType === 'gsap' && <GsapCanvas code={code} />}
+              {rType === 'anime' && <AnimeCanvas code={code} />}
+              {rType === 'lottie' && <LottieCanvas code={code} />}
+              {rType === 'matter' && <MatterCanvas code={code} />}
+              {rType === 'html' && <HtmlCanvas code={code} />}
+              {rType === 'remotion' && <RemotionCanvas code={code} />}
+              {rType === 'plan' && <PlanCanvas code={code} />}
             </div>
           </div>
         </div>
