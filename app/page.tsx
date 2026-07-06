@@ -154,7 +154,7 @@ const GenesisApp = () => {
       if (!FILE_UPLOAD_CONFIG.acceptedTypes.includes(file.type)) {
         toast({
           title: 'Unsupported format',
-          description: `${file.name} is not a supported image format`,
+          description: `${file.name} is not a supported file format`,
           variant: 'destructive',
         });
         return false;
@@ -162,7 +162,7 @@ const GenesisApp = () => {
       if (file.size > FILE_UPLOAD_CONFIG.maxSize) {
         toast({
           title: 'File too large',
-          description: `${file.name} exceeds the maximum size of 10MB`,
+          description: `${file.name} exceeds the maximum size of ${FILE_UPLOAD_CONFIG.maxSize / (1024 * 1024)}MB`,
           variant: 'destructive',
         });
         return false;

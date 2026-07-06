@@ -64,7 +64,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         return false;
       }
       if (file.size > FILE_UPLOAD_CONFIG.maxSize) {
-        error('File too large', `${file.name} exceeds the maximum size of 10MB`);
+        error('File too large', `${file.name} exceeds the maximum size of ${FILE_UPLOAD_CONFIG.maxSize / (1024 * 1024)}MB`);
         return false;
       }
       return true;

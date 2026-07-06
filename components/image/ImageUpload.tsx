@@ -19,7 +19,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
 }) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: {
-      'image/*': FILE_UPLOAD_CONFIG.acceptedExtensions,
+      'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.gif'],
     },
     maxSize: FILE_UPLOAD_CONFIG.maxSize,
     maxFiles,
@@ -56,7 +56,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           </div>
 
           <div className="flex gap-2 text-xs text-muted-foreground">
-            {FILE_UPLOAD_CONFIG.acceptedExtensions.map((ext) => (
+            {['.jpg', '.jpeg', '.png', '.webp', '.gif'].map((ext) => (
               <span key={ext} className="px-2 py-1 bg-muted rounded">
                 {ext}
               </span>

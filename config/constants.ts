@@ -147,15 +147,16 @@ export const ANALYSIS_TYPES = [
 
 // File Upload Constraints
 export const FILE_UPLOAD_CONFIG = {
-  maxSize: 10 * 1024 * 1024, // 10MB
+  maxSize: 500 * 1024 * 1024, // 500MB
   maxFiles: 50,
   acceptedTypes: [
     'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+    'video/mp4', 'video/webm', 'video/x-matroska', 'video/quicktime',
     'application/pdf', 
     'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/csv', 'text/plain', 'text/markdown'
   ],
-  acceptedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.pdf', '.doc', '.docx', '.csv', '.txt', '.md'],
+  acceptedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.webm', '.mkv', '.mov', '.pdf', '.doc', '.docx', '.csv', '.txt', '.md'],
 };
 
 // App Constants
