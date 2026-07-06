@@ -152,11 +152,12 @@ export const FILE_UPLOAD_CONFIG = {
   acceptedTypes: [
     'image/jpeg', 'image/png', 'image/webp', 'image/gif',
     'video/mp4', 'video/webm', 'video/x-matroska', 'video/quicktime',
+    'audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/mp4', 'audio/x-m4a',
     'application/pdf', 
     'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/csv', 'text/plain', 'text/markdown'
   ],
-  acceptedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.webm', '.mkv', '.mov', '.pdf', '.doc', '.docx', '.csv', '.txt', '.md'],
+  acceptedExtensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.webm', '.mkv', '.mov', '.mp3', '.wav', '.ogg', '.aac', '.m4a', '.pdf', '.doc', '.docx', '.csv', '.txt', '.md'],
 };
 
 // App Constants
