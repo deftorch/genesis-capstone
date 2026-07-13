@@ -27,6 +27,7 @@ const defaultPreferences: UserPreferences = {
   showTokenCount: false,
   enableNotifications: true,
   developerMode: false,
+  customSystemPrompt: '',
 };
 
 export const useSettingsStore = create<SettingsStore>()(

@@ -113,6 +113,12 @@ export interface UserPreferences {
   showTokenCount: boolean;
   enableNotifications: boolean;
   developerMode?: boolean;
+  /**
+   * User-defined override for the default Genesis system prompt, editable in
+   * Settings > Developer > System Instructions. Empty string / undefined
+   * means "use the built-in default".
+   */
+  customSystemPrompt?: string;
 }
 
 // Types for Analytics

@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useUIStore } from '@/lib/store/ui-store';
+import { useSettingsStore } from '@/lib/store/settings-store';
 import { extractAllCodes } from '@/lib/extract-code';
 import { parseSSEStream } from '@/lib/sse-parser';
 import { ImageAttachment } from '@/types';
@@ -16,6 +17,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
   const abortControllerRef = useRef<AbortController | null>(null);
   const chatStore = useChatStore();
   const ui = useUIStore();
+  const { preferences } = useSettingsStore();
 
   // Build image payloads from data URLs (exactly as in page.tsx)
   const buildImagePayloads = useCallback((images: ImageAttachment[]) => {
@@ -120,6 +122,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
           model: selectedModel,
           currentCode: ui.editableCode || '',
           images: imagePayloads.length > 0 ? imagePayloads : undefined,
+          systemPromptOverride: preferences.customSystemPrompt || undefined,
         }),
       });
 
@@ -275,6 +278,7 @@ export function useChatSubmit({ chatId, selectedModel }: UseChatSubmitOptions) {
           model: selectedModel || 'gemini-3-flash',
           currentCode: hasCodeContext ? ui.editableCode || '' : '',
           images: imagePayloads && imagePayloads.length > 0 ? imagePayloads : undefined,
+          systemPromptOverride: preferences.customSystemPrompt || undefined,
         }),
       });
 

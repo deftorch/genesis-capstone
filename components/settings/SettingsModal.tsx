@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Settings2, Key, Palette, Shield, Download, Upload, Sparkles, Sun, Moon, Laptop, AlertTriangle } from 'lucide-react';
+import { X, Settings2, Key, Palette, Shield, Download, Upload, Sparkles, Sun, Moon, Laptop, AlertTriangle, FileText, RotateCcw } from 'lucide-react';
 import { Modal, ModalHeader, ModalContent } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useSettingsStore } from '@/lib/store/settings-store';
 import { useChatStore } from '@/lib/store/chat-store';
 import { useToast } from '@/lib/store/toast-store';
 import { cn } from '@/lib/utils';
+import { DEFAULT_SYSTEM_PROMPT } from '@/lib/system-prompts';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -27,6 +28,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const { preferences, apiKeys, updatePreferences, setTheme, addAPIKey, removeAPIKey, getAPIKey } = useSettingsStore();
   const { chats, importChats } = useChatStore();
   const { success, error } = useToast();
+
+  // Local draft for the custom system prompt textarea, so typing doesn't
+  // write to the persisted store (and re-render everything) on every keystroke.
+  const [systemPromptDraft, setSystemPromptDraft] = React.useState(preferences.customSystemPrompt || '');
+  React.useEffect(() => {
+    setSystemPromptDraft(preferences.customSystemPrompt || '');
+  }, [isOpen]);
+
+  const isSystemPromptCustomized = !!(preferences.customSystemPrompt && preferences.customSystemPrompt.trim());
+  const systemPromptDirty = systemPromptDraft !== (preferences.customSystemPrompt || '');
+
+  const handleSaveSystemPrompt = () => {
+    updatePreferences({ customSystemPrompt: systemPromptDraft });
+    success('System Instructions Saved', 'Genesis will use your custom prompt for new messages.');
+  };
+
+  const handleResetSystemPrompt = () => {
+    setSystemPromptDraft('');
+    updatePreferences({ customSystemPrompt: '' });
+    success('Reset to Default', 'Genesis will use the built-in system prompt again.');
+  };
 
   const tabs = [
     { id: 'general' as TabType, label: 'General', icon: Settings2 },
@@ -501,7 +523,67 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                           </span>
                         </div>
                       )}
-                      
+
+                      {/* System Instructions (custom system prompt) */}
+                      <div className="border-t border-gray-200 dark:border-white/10 pt-4 mt-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 font-medium text-gray-900 dark:text-white">
+                            <FileText className="h-4 w-4 text-[#1a6adf] dark:text-[#60aaff]" />
+                            System Instructions
+                            {isSystemPromptCustomized && (
+                              <span className="text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                                Custom
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleResetSystemPrompt}
+                            disabled={!isSystemPromptCustomized && !systemPromptDraft}
+                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            Reset to default
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          This is the prompt sent to Gemini on every message, defining Genesis&apos;s persona and
+                          the renderer rules (p5.js, D3, SVG, Mermaid, etc). Leave it as the default, or override
+                          it to change how Genesis behaves. Your override is stored locally in your browser.
+                        </p>
+                        <textarea
+                          value={systemPromptDraft}
+                          onChange={(e) => setSystemPromptDraft(e.target.value)}
+                          placeholder={DEFAULT_SYSTEM_PROMPT}
+                          spellCheck={false}
+                          rows={10}
+                          className="w-full rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-black/20 p-3 text-xs font-mono leading-relaxed text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y"
+                        />
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[11px] text-gray-400">
+                            {systemPromptDraft.trim()
+                              ? `${systemPromptDraft.length.toLocaleString()} characters (custom)`
+                              : 'Empty = using the built-in default prompt shown above as placeholder'}
+                          </span>
+                          <Button
+                            onClick={handleSaveSystemPrompt}
+                            disabled={!systemPromptDirty}
+                            className="bg-[#1a6adf] hover:bg-[#1a6adf]/90 text-white dark:bg-white dark:text-black dark:hover:bg-gray-100"
+                          >
+                            Save
+                          </Button>
+                        </div>
+                        {isSystemPromptCustomized && (
+                          <div className="flex items-start gap-2 text-[11px] text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2">
+                            <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                            <span>
+                              Custom prompts that drop the <code className="font-mono">// renderer: type</code> instructions
+                              may break automatic code-block rendering (Genesis will fall back to p5.js).
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="flex items-center justify-between border-t border-gray-200 dark:border-white/10 pt-4 mt-4">
                         <div>
                           <div className="font-medium text-gray-900 dark:text-white">Show Token Count</div>
