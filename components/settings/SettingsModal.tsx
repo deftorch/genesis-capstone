@@ -34,7 +34,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const [systemPromptDraft, setSystemPromptDraft] = React.useState(preferences.customSystemPrompt || '');
   React.useEffect(() => {
     setSystemPromptDraft(preferences.customSystemPrompt || '');
-  }, [isOpen]);
+  }, [isOpen, preferences.customSystemPrompt]);
 
   const isSystemPromptCustomized = !!(preferences.customSystemPrompt && preferences.customSystemPrompt.trim());
   const systemPromptDirty = systemPromptDraft !== (preferences.customSystemPrompt || '');
@@ -577,7 +577,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                           <div className="flex items-start gap-2 text-[11px] text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2">
                             <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
                             <span>
-                              Custom prompts that drop the <code className="font-mono">// renderer: type</code> instructions
+                              Custom prompts that drop the <code className="font-mono">{"// renderer: type"}</code> instructions
                               may break automatic code-block rendering (Genesis will fall back to p5.js).
                             </span>
                           </div>

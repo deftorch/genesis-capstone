@@ -36,7 +36,6 @@ export const ChatScrollMap: React.FC<ChatScrollMapProps> = ({ containerRef, mess
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const t1 = setTimeout(calculateMarkers, 100);
     const t2 = setTimeout(calculateMarkers, 500);
     const t3 = setTimeout(calculateMarkers, 1000);
@@ -45,6 +44,7 @@ export const ChatScrollMap: React.FC<ChatScrollMapProps> = ({ containerRef, mess
       clearTimeout(t2);
       clearTimeout(t3);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   if (userMarkers.length === 0) return null;
