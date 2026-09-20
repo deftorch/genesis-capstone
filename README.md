@@ -4,7 +4,7 @@ Genesis is a premium, highly interactive creative AI assistant specialized in ge
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 *   **Generative Art & Visualizations**: Interact with AI to compile live previews of visual code (p5.js sketches, D3.js data charts, Mermaid flowcharts, SVG illustrations).
 *   **Sandboxed Runtimes**: Renders user-generated canvas scripts securely inside scoped iframes using strict origin policies (`sandbox="allow-scripts"`).
@@ -14,7 +14,7 @@ Genesis is a premium, highly interactive creative AI assistant specialized in ge
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 *   **Framework**: Next.js 15 (App Router, Standalone Output)
 *   **Frontend**: React 18, Tailwind CSS, Lucide React, Zustand State Management
@@ -24,7 +24,7 @@ Genesis is a premium, highly interactive creative AI assistant specialized in ge
 
 ---
 
-## ⚙️ Environment Variables
+##  Environment Variables
 
 Create a `.env.local` (for development) or `.env` (for production) file in the root directory:
 
@@ -42,7 +42,7 @@ CRON_TOKEN=a-long-securely-generated-secret-token
 
 ---
 
-## 📦 Getting Started
+##  Getting Started
 
 ### Installation
 Ensure you have the [Bun runtime](https://bun.sh/) installed:
@@ -68,7 +68,7 @@ bun run build
 
 ---
 
-## 🖥️ PM2 Process Management
+##  PM2 Process Management
 Genesis is pre-configured for PM2 deployments. Run the application in production mode using:
 
 ```bash
@@ -83,7 +83,7 @@ The production logs will be written to `./logs/out.log` and `./logs/err.log`. En
 
 ---
 
-## 🔒 Security Measures
+##  Security Measures
 
 1.  **XSS Protection**: Markdown rendering utilizes `rehype-sanitize` to purge unsafe HTML tags and scripts.
 2.  **SSRF Shield**: Image analysis fetches validate input URLs against internal/private IP ranges (RFC 1918) prior to dispatching HTTP requests.
